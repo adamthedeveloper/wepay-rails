@@ -1,6 +1,5 @@
+require 'active_record'
 module WepayRails
-  require 'helpers/model_helpers'
-
   module Payments
     require 'helpers/controller_helpers'
     class Gateway
@@ -18,5 +17,9 @@ module WepayRails
     include WepayRails::Helpers::ControllerHelpers
   end
 
-  include WepayRails::Helpers::ModelHelpers
+  require 'helpers/model_helpers'
+  def self.included(base)
+    base.extend WepayRails::Helpers::ModelHelpers
+  end
 end
+ActiveRecord::Base.send(:include, WepayRails)
