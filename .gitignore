@@ -29,6 +29,7 @@ pkg
 #
 #.DS_Store
 .idea
+.rvmrc
 
 # For TextMate
 #*.tmproj
