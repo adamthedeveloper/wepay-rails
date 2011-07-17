@@ -5,11 +5,12 @@ module WepayRails
         @params = args.last if args.last.is_a?(Hash)
         @column = args.first.to_s
 
-        class_eval{
-          "def has_#{@column}?
+        puts "*"*50
+        puts @column
+
+        eval "define_method(has_#{@column}?) {
             #{@column}.present?
-          end"
-        }
+        }"
       end
     end
   end
