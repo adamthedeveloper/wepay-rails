@@ -8,10 +8,12 @@ module WepayRails
         puts "*"*50
         puts @column
 
-
+        define_method "has_#{@column}?" do
+          "#{@column}.present?"
+        end
       end
 
-      class_eval "def has_#{@column}?; #{@column}.present?; end"
+
     end
   end
 end
