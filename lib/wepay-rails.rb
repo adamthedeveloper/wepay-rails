@@ -12,7 +12,7 @@ module WepayRails
       end
     end
 
-    include Wepay::Helpers::ControllerHelpers
+    include WepayRails::Helpers::ControllerHelpers
   end
 
   include WepayRails::Helpers::ModelHelpers
