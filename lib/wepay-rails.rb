@@ -1,5 +1,8 @@
 module WepayRails
+  require 'helpers/model_helpers'
+
   module Payments
+    require 'helpers/controller_helpers'
     class Gateway
       include HTTParty
 
