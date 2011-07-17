@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
   s.email = %q{adammede@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE.txt",
+    "README",
     "README.rdoc"
   ]
   s.files = [
@@ -21,13 +22,15 @@ Gem::Specification.new do |s|
     "Gemfile",
     "Gemfile.lock",
     "LICENSE.txt",
+    "README",
     "README.rdoc",
     "Rakefile",
     "lib/helpers/controller_helpers.rb",
     "lib/helpers/model_helpers.rb",
     "lib/wepay-rails.rb",
     "test/helper.rb",
-    "test/test_wepay-rails.rb"
+    "test/test_wepay-rails.rb",
+    "wepay-rails.gemspec"
   ]
   s.homepage = %q{http://github.com/adamthedeveloper/wepay-rails}
   s.licenses = ["MIT"]
