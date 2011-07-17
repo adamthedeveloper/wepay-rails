@@ -11,9 +11,7 @@ module WepayRails
 
       end
 
-      eval "define_method(has_#{@column}?) {
-            #{@column}.present?
-      }"
+      class_eval "def has_#{@column}?; #{@column}.present?; end"
     end
   end
 end
