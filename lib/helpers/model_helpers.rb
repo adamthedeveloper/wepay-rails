@@ -8,10 +8,12 @@ module WepayRails
         puts "*"*50
         puts @column
 
-        eval "define_method(has_#{@column}?) {
-            #{@column}.present?
-        }"
+
       end
+
+      eval "define_method(has_#{@column}?) {
+            #{@column}.present?
+      }"
     end
   end
 end
