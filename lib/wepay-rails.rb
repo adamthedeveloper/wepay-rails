@@ -4,7 +4,7 @@ module WepayRails
     require 'helpers/controller_helpers'
     class Gateway
       include HTTParty
-      base_uri Rails.env.production? ? "https://api.wepay.com" : "https://stage.wepay.com"
+      base_uri Rails.env.production? ? "https://wepayapi.com/v2" : "https://stage.wepayapi.com/v2"
 
       attr_accessor :wepay_auth_code
 
@@ -19,7 +19,7 @@ module WepayRails
 
       def wepay_user
         File.open('/tmp/wepay.log', 'a') {|f| f.write("Wepay_user: #{wepay_auth_header.inspect}") }
-        response = self.class.get("/v2/user", {:headers => wepay_auth_header})
+        response = self.class.get("user", {:headers => wepay_auth_header})
         JSON.parse(response.body)
       end
     end

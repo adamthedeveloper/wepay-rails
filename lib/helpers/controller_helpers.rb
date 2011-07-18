@@ -15,7 +15,9 @@ module WepayRails
           "#{k.to_s}=#{v}"
         end.join('&')
 
-        "#{@base_uri}/v2/oauth2/authorize?#{query}"
+        auth_base_uri = Rails.env.production? ? "https://api.wepay.com" : "https://stage.wepay.com"
+
+        "#{auth_base_uri}/v2/oauth2/authorize?#{query}"
       end
 
       def redirect_to_wepay_for_auth(redirect_uri, scope)
