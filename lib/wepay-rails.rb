@@ -18,7 +18,7 @@ module WepayRails
       end
 
       def wepay_user
-        File.open('/tmp/wepay.log', 'w') {|f| f.write(wepay_auth_header.inspect) }
+        File.open('/tmp/wepay.log', 'a') {|f| f.write("Wepay_user: #{wepay_auth_header.inspect}") }
         response = self.class.get("/v2/user", {:headers => wepay_auth_header})
         JSON.parse(response.body)
       end
