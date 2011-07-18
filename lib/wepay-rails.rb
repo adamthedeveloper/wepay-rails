@@ -14,15 +14,12 @@ module WepayRails
       end
 
       def wepay_auth_header
-        logger.debug "*"*50
-        logger.debug "Wepay auth code #{@wepay_auth_code}"
         {'Authorization' => "Bearer: #{@wepay_auth_code}"}
       end
 
       def wepay_user
+        File.open('/tmp/wepay.log', 'w') {|f| f.write(wepay_auth_header.inspect) }
         response = self.class.get("/v2/user", {:headers => wepay_auth_header})
-        logger.debug "*"*50
-        logger.debug wepay_auth_header.inspect
         JSON.parse(response.body)
       end
     end
