@@ -25,6 +25,24 @@ module WepayRails
       def gateway
         @gateway ||= Gateway.new
       end
+
+      def wepay_auth_code=(auth_code)
+        @wepay_auth_code = auth_code
+      end
+
+      def wepay_auth_code
+        @wepay_auth_code
+      end
+
+      def wepay_auth_header
+        {'Authorization' => "Bearer: #{wepay_auth_code}"}
+      end
+
+      def wepay_user
+        response = get "/v2/user", {:headers => wepay_auth_header}
+        puts response.inspect
+        JSON.parse(response)
+      end
     end
   end
 end
