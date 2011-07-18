@@ -19,8 +19,7 @@ module WepayRails
 
       def wepay_user
         response = self.class.get("/v2/user", {:headers => wepay_auth_header})
-        puts response.inspect
-        JSON.parse(response)
+        JSON.parse(response.body)
       end
     end
 
