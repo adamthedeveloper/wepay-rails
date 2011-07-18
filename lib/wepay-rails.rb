@@ -14,6 +14,8 @@ module WepayRails
       end
 
       def wepay_auth_header
+        puts "*"*50
+        puts "Wepay auth code #{@wepay_auth_code}"
         {'Authorization' => "Bearer: #{@wepay_auth_code}"}
       end
 
