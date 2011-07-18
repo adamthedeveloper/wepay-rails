@@ -23,7 +23,7 @@ module WepayRails
       end
 
       def gateway
-        @gateway ||= Gateway.new
+        @gateway ||= WepayRails::Payments::Gateway.new
       end
 
       def wepay_auth_code=(auth_code)
