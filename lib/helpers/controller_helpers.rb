@@ -27,19 +27,19 @@ module WepayRails
       end
 
       def wepay_auth_code=(auth_code)
-        @wepay_auth_code = auth_code
+        gateway.wepay_auth_code = auth_code
       end
 
       def wepay_auth_code
-        @wepay_auth_code
+        gateway.wepay_auth_code
       end
 
       def wepay_auth_header
-        {'Authorization' => "Bearer: #{wepay_auth_code}"}
+        {'Authorization' => "Bearer: #{gateway.wepay_auth_code}"}
       end
 
       def wepay_user
-        response = self.class.get("/v2/user", {:headers => wepay_auth_header})
+        response = gateway.get("/v2/user", {:headers => wepay_auth_header})
         puts response.inspect
         JSON.parse(response)
       end

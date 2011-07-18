@@ -5,6 +5,8 @@ module WepayRails
     class Gateway
       include HTTParty
 
+      attr_accessor :wepay_auth_code
+
       base_uri @base_uri
 
       def initialize(*args)
