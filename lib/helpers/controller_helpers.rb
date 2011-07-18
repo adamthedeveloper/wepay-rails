@@ -25,14 +25,6 @@ module WepayRails
       def gateway
         @gateway ||= WepayRails::Payments::Gateway.new
       end
-
-      def wepay_auth_code=(auth_code)
-        gateway.wepay_auth_code = auth_code
-      end
-
-      def wepay_auth_code
-        gateway.wepay_auth_code
-      end
     end
   end
 end
