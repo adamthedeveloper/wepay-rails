@@ -26,10 +26,11 @@ module WepayRails
       # {"user_id":"123456","access_token":"1337h4x0rzabcd12345","token_type":"BEARER"} Example
       def initialize_wepay_access_token(auth_code)
         wepay_access_token=(gateway.access_token(auth_code))
+        File.open('/tmp/redirect_loop.log','a') {|f| f.write(wepay_access_token)}
         return
       rescue WepayRails::Exceptions::ExpiredTokenError => e
-        redirect_to_wepay_for_auth gateway.scope
-        return
+        File.open('/tmp/redirect_loop.log','a') {|f| f.write(e.message)}
+        redirect_to_wepay_for_auth(gateway.scope) and return
       end
 
       # Since we are saving the access token in the session,
