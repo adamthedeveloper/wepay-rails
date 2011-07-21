@@ -1,75 +1,17 @@
 module WepayRails
   module Helpers
     module ControllerHelpers
-      # Get the auth code for the customer
-      # arguments are the redirect_uri and an array of permissions that your application needs
-      # ex. ['manage_accounts','collect_payments','view_balance','view_user']
-      def auth_code_url(redirect_uri, permissions)
-        params = {
-            :client_id => @config[:client_id],
-            :redirect_uri => redirect_uri,
-            :scope => permissions.join(',')
-        }
 
-        query = params.map do |k, v|
-          "#{k.to_s}=#{v}"
-        end.join('&')
-
-        "#{@base_uri}/v2/oauth2/authorize?#{query}"
+      def redirect_to_wepay_for_auth(scope)
+        redirect_to gateway.auth_code_url(scope)
       end
 
-      def token_url(redirect_uri)
-        params = config_params(redirect_uri)
-
-        query = params.map do |k, v|
-          "#{k.to_s}=#{v}"
-        end.join('&')
-
-        "#{@base_uri}/v2/oauth2/authorize?#{query}"
-      end
-
-      def config_params(redirect_uri)
-        {
-            :client_id => wepay_config[:client_id],
-            :redirect_uri => redirect_uri,
-            :client_secret => wepay_config[:client_secret],
-
-        }
-      end
-
-      def wepay_config
-        gateway.config
-      end
-
-      def redirect_to_wepay_for_auth(redirect_uri, scope)
-        redirect_to gateway.auth_code_url(redirect_uri, scope)
-      end
-
-      def redirect_to_wepay_for_token(redirect_uri)
-        redirect_to gateway.token_url(redirect_uri)
+      def redirect_to_wepay_for_token
+        redirect_to gateway.token_url
       end
 
       def gateway
         @gateway ||= WepayRails::Payments::Gateway.new
-      end
-
-      # Auth code is the code that we store in the model
-      def wepay_auth_code=(auth_code)
-        @wepay_auth_code = auth_code
-      end
-
-      # Auth code is the code that we store in the model
-      def wepay_auth_code
-        @wepay_auth_code
-      end
-
-      def wepay_auth_header
-        {'Authorization' => "Bearer: #{wepay_auth_code}"}
-      end
-
-      def wepay_user
-        response = self.class.get("/v2/user", {:headers => wepay_auth_header})
-        JSON.parse(response)
       end
 
       # From https://stage.wepay.com/developer/tutorial/authorization
@@ -83,22 +25,7 @@ module WepayRails
       # Response
       # {"user_id":"123456","access_token":"1337h4x0rzabcd12345","token_type":"BEARER"} Example
       def initialize_wepay_access_token(auth_code)
-        logger.debug "WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - receiving #{auth_code}"
-        File.open('/tmp/fugaze.log','a') {|f| f.write("WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - receiving #{auth_code}")}
-        response = gateway.get("/v2/oauth2/token", config_params("http://www.example.com").merge(:code => auth_code))
-        logger.debug "WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - after call to wepay - response #{response.inspect}"
-        File.open('/tmp/fugaze.log','a') {|f| f.write("WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - after call to wepay - response #{response.inspect}")}
-        raise unless response.present?
-        logger.debug "WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - after call to wepay - response is present"
-        File.open('/tmp/fugaze.log','a') {|f| f.write("WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - after call to wepay - response is present")}
-        logger.debug response.inspect
-        File.open('/tmp/fugaze.log','a') {|f| f.write(response.inspect)}
-        json = JSON.parse(response.body)
-        logger.debug "WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - after call to wepay - json is #{json.inspect}"
-        File.open('/tmp/fugaze.log','a') {|f| f.write("WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - after call to wepay - json is #{json.inspect}")}
-        wepay_access_token = json["access_token"]
-        logger.debug "WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - after call to wepay - wepay_access_token is #{wepay_access_token.inspect}"
-        File.open('/tmp/fugaze.log','a') {|f| f.write("WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - after call to wepay - wepay_access_token is #{wepay_access_token.inspect}")}
+        wepay_access_token = gateway.access_token(auth_code)
         raise unless wepay_access_token.present?
       end
 
