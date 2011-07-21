@@ -1,8 +1,13 @@
 require 'active_record'
 require 'helpers/model_helpers'
 require 'helpers/controller_helpers'
-require 'exceptions'
 module WepayRails
+
+  module Exceptions
+    class AccessTokenError < StandardError; end
+    class ExpiredTokenError < StandardError; end
+  end
+
   module Payments
     class Gateway
       include HTTParty
