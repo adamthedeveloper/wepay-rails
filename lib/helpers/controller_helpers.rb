@@ -25,7 +25,8 @@ module WepayRails
       # Response
       # {"user_id":"123456","access_token":"1337h4x0rzabcd12345","token_type":"BEARER"} Example
       def initialize_wepay_access_token(auth_code)
-        wepay_access_token = gateway.access_token(auth_code)
+        wepay_access_token=(gateway.access_token(auth_code))
+        return
       rescue WepayRails::Exceptions::ExpiredTokenError => e
         redirect_to_wepay_for_auth gateway.scope
         return
