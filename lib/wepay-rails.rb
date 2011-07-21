@@ -19,7 +19,7 @@ module WepayRails
         @wepay_auth_code = auth_code
         File.open('/tmp/wepay-rails.log','a') {|f| f.write(auth_code)}
         File.open('/tmp/wepay-rails.log','a') {|f| f.write(@config.merge(:code => auth_code).inspect)}
-        response = self.class.get("#{@base_uri}/v2/oauth2/token", @config.merge(:code => auth_code))
+        response = self.class.get("#{@base_uri}/v2/oauth2/token", :query => @config.merge(:code => auth_code))
         json = JSON.parse(response.body)
         File.open('/tmp/wepay-rails.log','a') {|f| f.write(response.body)}
         File.open('/tmp/wepay-rails.log','a') {|f| f.write(json.inspect)}
