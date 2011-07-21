@@ -79,10 +79,16 @@ module WepayRails
       # Response
       # {"user_id":"123456","access_token":"1337h4x0rzabcd12345","token_type":"BEARER"} Example
       def initialize_wepay_access_token(auth_code)
+        puts "WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - receiving #{auth_code}"
         response = gateway.get("/v2/oauth2/token", config_params("http://www.example.com").merge(:code => auth_code))
+        puts "WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - after call to wepay - response #{response.inspect}"
         raise unless response.present?
+        puts "WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - after call to wepay - response is present"
+        puts response.inspect
         json = JSON.parse(response.body)
+        puts "WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - after call to wepay - json is #{json.inspect}"
         wepay_access_token = json["access_token"]
+        puts "WepayRails::Helpers::ControllerHelpers#initialize_wepay_access_token - after call to wepay - wepay_access_token is #{wepay_access_token.inspect}"
         raise unless wepay_access_token.present?
       end
 
