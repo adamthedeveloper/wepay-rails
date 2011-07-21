@@ -7,6 +7,8 @@ module WepayRails
 
       base_uri @base_uri
 
+      attr_accessor :config
+
       def initialize(*args)
         yml = Rails.root.join('config', 'wepay.yml').to_s
         @config = YAML.load_file(yml)[Rails.env].symbolize_keys

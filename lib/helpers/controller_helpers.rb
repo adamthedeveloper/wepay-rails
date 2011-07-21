@@ -30,11 +30,15 @@ module WepayRails
 
       def config_params(redirect_uri)
         {
-            :client_id => @config[:client_id],
+            :client_id => wepay_config[:client_id],
             :redirect_uri => redirect_uri,
-            :client_secret => @config[:client_secret],
+            :client_secret => wepay_config[:client_secret],
 
         }
+      end
+
+      def wepay_config
+        gateway.config
       end
 
       def redirect_to_wepay_for_auth(redirect_uri, scope)
