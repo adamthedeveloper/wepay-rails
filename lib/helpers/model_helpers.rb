@@ -19,6 +19,10 @@ module WepayRails
         define_method "has_#{@column}?" do
           "#{@column}.present?"
         end
+
+        define_method "save_#{@column}" do |value|
+          "self.update_attribute(#{@column}, #{value})"
+        end
       end
 
 
