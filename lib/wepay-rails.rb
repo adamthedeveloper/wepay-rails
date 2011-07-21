@@ -7,22 +7,29 @@ module WepayRails
 
       base_uri @base_uri
 
-      attr_accessor :wepay_access_token, :wepay_auth_code
+      attr_accessor :wepay_access_token, :wepay_auth_code, :scope
 
       def initialize(*args)
         yml = Rails.root.join('config', 'wepay.yml').to_s
         @config = YAML.load_file(yml)[Rails.env].symbolize_keys
+        @scope = @config.delete(:scope)
         @base_uri = Rails.env.production? ? "https://api.wepay.com" : "https://stage.wepay.com"
       end
 
       def access_token(auth_code)
         @wepay_auth_code = auth_code
-        File.open('/tmp/wepay-rails.log','a') {|f| f.write(auth_code)}
-        File.open('/tmp/wepay-rails.log','a') {|f| f.write(@config.merge(:code => auth_code).inspect)}
         response = self.class.get("#{@base_uri}/v2/oauth2/token", :query => @config.merge(:code => auth_code))
         json = JSON.parse(response.body)
-        File.open('/tmp/wepay-rails.log','a') {|f| f.write(response.body)}
-        File.open('/tmp/wepay-rails.log','a') {|f| f.write(json.inspect)}
+
+        if json.has_key?("error")
+          if json.has_key?("error_description")
+            raise WepayRails::Exceptions::ExpiredTokenError.new("You will need to get a new authorization code") if json["error_description"] == "the code has expired"
+            raise WepayRails::Exceptions::AccessTokenError.new(json["error_description"])
+          end
+        end
+
+        raise WepayRails::Exceptions::AccessTokenError.new("A problem occurred trying to get the access token: #{json.inspect}") unless json.has_key?("access_token")
+
         @wepay_access_token = json["access_token"]
       end
 

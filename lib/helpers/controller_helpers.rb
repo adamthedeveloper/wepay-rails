@@ -2,7 +2,7 @@ module WepayRails
   module Helpers
     module ControllerHelpers
 
-      def redirect_to_wepay_for_auth(scope)
+      def redirect_to_wepay_for_auth(scope=gateway.scope)
         redirect_to gateway.auth_code_url(scope)
       end
 
@@ -26,7 +26,9 @@ module WepayRails
       # {"user_id":"123456","access_token":"1337h4x0rzabcd12345","token_type":"BEARER"} Example
       def initialize_wepay_access_token(auth_code)
         wepay_access_token = gateway.access_token(auth_code)
-        raise unless wepay_access_token.present?
+      rescue WepayRails::Exceptions::ExpiredTokenError => e
+        redirect_to_wepay_for_auth gateway.scope
+        return
       end
 
       # Since we are saving the access token in the session,
