@@ -17,15 +17,24 @@ module WepayRails
       attr_accessor :wepay_access_token, :wepay_auth_code, :scope
 
       def initialize(*args)
+        @wepay_access_token = args.first
+
         yml = Rails.root.join('config', 'wepay.yml').to_s
         @config = YAML.load_file(yml)[Rails.env].symbolize_keys
+
         @scope = @config.delete(:scope)
-        @base_uri = Rails.env.production? ? "https://api.wepay.com" : "https://stage.wepay.com"
+
+        # Build the base uri
+        # Default if there isn't a setting for version and/or api uri
+        version = @config[:wepay_api_version].present? ? @config[:wepay_api_version] : "v2"
+        api_uri = @config[:wepay_api_uri].present? ? @config[:wepay_api_uri] : "https://wepayapi.com"
+
+        @base_uri = "#{api_uri}/#{version}"
       end
 
       def access_token(auth_code)
         @wepay_auth_code = auth_code
-        response = self.class.get("#{@base_uri}/v2/oauth2/token", :query => @config.merge(:code => auth_code))
+        response = self.class.get("#{@base_uri}/oauth2/token", :query => @config.merge(:code => auth_code))
         json = JSON.parse(response.body)
 
         if json.has_key?("error")
@@ -50,7 +59,7 @@ module WepayRails
           "#{k.to_s}=#{v}"
         end.join('&')
 
-        "#{@base_uri}/v2/oauth2/authorize?#{query}"
+        "#{@base_uri}/oauth2/authorize?#{query}"
       end
 
       def token_url
@@ -58,7 +67,7 @@ module WepayRails
           "#{k.to_s}=#{v}"
         end.join('&')
 
-        "#{@base_uri}/v2/oauth2/authorize?#{query}"
+        "#{@base_uri}/oauth2/authorize?#{query}"
       end
 
       def wepay_auth_header
@@ -66,7 +75,7 @@ module WepayRails
       end
 
       def wepay_user
-        response = self.class.get("#{@base_uri}/v2/user", {:headers => wepay_auth_header})
+        response = self.class.get("#{@base_uri}/user", {:headers => wepay_auth_header})
         JSON.parse(response.body)
       end
     end

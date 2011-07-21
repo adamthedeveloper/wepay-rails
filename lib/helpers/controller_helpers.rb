@@ -6,12 +6,8 @@ module WepayRails
         redirect_to gateway.auth_code_url(scope)
       end
 
-      def redirect_to_wepay_for_token
-        redirect_to gateway.token_url
-      end
-
       def gateway
-        @gateway ||= WepayRails::Payments::Gateway.new
+        @gateway ||= WepayRails::Payments::Gateway.new(wepay_access_token)
       end
 
       # From https://stage.wepay.com/developer/tutorial/authorization
@@ -25,11 +21,9 @@ module WepayRails
       # Response
       # {"user_id":"123456","access_token":"1337h4x0rzabcd12345","token_type":"BEARER"} Example
       def initialize_wepay_access_token(auth_code)
-        wepay_access_token=(gateway.access_token(auth_code))
-        File.open('/tmp/redirect_loop.log','a') {|f| f.write(wepay_access_token)}
+        session[unique_wepay_access_token_key] = gateway.access_token(auth_code)
         return
       rescue WepayRails::Exceptions::ExpiredTokenError => e
-        File.open('/tmp/redirect_loop.log','a') {|f| f.write(e.message)}
         redirect_to_wepay_for_auth(gateway.scope) and return
       end
 
@@ -38,12 +32,6 @@ module WepayRails
       # be a setting in the wepay.yml file.
       def unique_wepay_access_token_key
         :IODDR8856UUFG6788
-      end
-
-      # Access token is the OAUTH access token that is used for future
-      # comunique
-      def wepay_access_token=(value)
-        session[unique_wepay_access_token_key] = value
       end
 
       # Access token is the OAUTH access token that is used for future
