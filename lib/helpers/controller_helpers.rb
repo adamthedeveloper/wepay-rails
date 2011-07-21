@@ -46,7 +46,7 @@ module WepayRails
       end
 
       def gateway
-        @gateway ||= Gateway.new
+        @gateway ||= WepayRails::Payments::Gateway.new
       end
 
       # Auth code is the code that we store in the model
