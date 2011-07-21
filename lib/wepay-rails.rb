@@ -37,7 +37,7 @@ module WepayRails
         "#{@base_uri}/v2/oauth2/authorize?#{query}"
       end
 
-      def token_url(redirect_uri)
+      def token_url
         query = @config.map do |k, v|
           "#{k.to_s}=#{v}"
         end.join('&')
