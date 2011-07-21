@@ -50,7 +50,7 @@ module WepayRails
       end
 
       def wepay_user
-        response = self.class.get("/v2/user", {:headers => wepay_auth_header})
+        response = self.class.get("#{@base_uri}/v2/user", {:headers => wepay_auth_header})
         JSON.parse(response.body)
       end
     end
