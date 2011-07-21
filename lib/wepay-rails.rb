@@ -1,7 +1,9 @@
 require 'active_record'
+require 'helpers/model_helpers'
+require 'helpers/controller_helpers'
+require 'exceptions'
 module WepayRails
   module Payments
-    require 'helpers/controller_helpers'
     class Gateway
       include HTTParty
 
@@ -64,10 +66,11 @@ module WepayRails
       end
     end
 
+    include WepayRails::Exceptions
     include WepayRails::Helpers::ControllerHelpers
   end
 
-  require 'helpers/model_helpers'
+
   def self.included(base)
     base.extend WepayRails::Helpers::ModelHelpers
   end

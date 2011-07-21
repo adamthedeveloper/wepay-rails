@@ -25,7 +25,7 @@ module WepayRails
         end
       end
 
-
+      include WepayRails::Exceptions
     end
   end
 end
