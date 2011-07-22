@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "VERSION",
+    "lib/examples/wepay.yml",
     "lib/helpers/controller_helpers.rb",
     "lib/helpers/model_helpers.rb",
     "lib/wepay-rails.rb",
