@@ -1,0 +1,24 @@
+production:
+  client_id: <your wepay client id>
+  client_secret: <your wepay client secret code>
+  redirect_uri: "<your callback url in your rails app>"
+  scope: ['refund_payments','collect_payments','view_balance','view_user']
+  #wepay_api_uri: "https://api.wepay.com"
+  wepay_api_uri: "https://stage.wepay.com"
+  wepay_api_version: "v2"
+
+development:
+  client_id: 12345
+  client_secret: 12345asdfg
+  redirect_uri: "http://www.example.com/wepay/authorize"
+  scope: ['refund_payments','collect_payments','view_balance','view_user']
+  wepay_api_uri: "https://stage.wepay.com"
+  wepay_api_version: "v2"
+
+test:
+  client_id: 12345
+  client_secret: 12345asdfg
+  redirect_uri: "http://www.example.com/wepay/authorize"
+  scope: ['refund_payments','collect_payments','view_balance','view_user']
+  wepay_api_uri: "https://stage.wepay.com"
+  wepay_api_version: "v2"

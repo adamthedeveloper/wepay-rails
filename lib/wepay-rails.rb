@@ -16,6 +16,12 @@ module WepayRails
 
       attr_accessor :wepay_access_token, :wepay_auth_code, :scope
 
+      # Pass in the wepay access token that we got after the oauth handshake
+      # and use it for ongoing comunique with Wepay.
+      # This also relies heavily on there being a wepay.yml file in your
+      # rails config directory - it must look like this:
+      #
+      #
       def initialize(*args)
         @wepay_access_token = args.first
 
