@@ -7,57 +7,57 @@ add a column to one of your models to hold the authentication token. For example
 
 Your migration:
 
-add_column :users, :wepay_auth_code, :string
+    add_column :users, :wepay_auth_code, :string
 
 Your model:
 
-class User < ActiveRecord::Base
-    wepayable :wepay_auth_code
-end
+    class User < ActiveRecord::Base
+        wepayable :wepay_auth_code
+    end
 
 Adding wepayable to your model also adds some helpful methods to your model, like save_<your column name>
 
 You'll need a controller and action for wepay to call back - add the entry to your routes file:
 
-class Wepay::AuthorizeController < ApplicationController
-  before_filter :authenticate_account!
+    class Wepay::AuthorizeController < ApplicationController
+      before_filter :authenticate_account!
 
-  def index
-    current_user.save_wepay_auth_code params[:code]
-    initialize_wepay_access_token(params[:code])
+      def index
+        current_user.save_wepay_auth_code params[:code]
+        initialize_wepay_access_token(params[:code])
 
-    redirect_to purchase_checkout_index_path
-  end
+        redirect_to purchase_checkout_index_path
+      end
 
-  private
-  include WepayRails::Payments
-end
+      private
+      include WepayRails::Payments
+    end
 
 When you include WepayRails::Payments, you get the controller actions you need. For instance, initialize_wepay_access_token(auth_code)
 which completes the Oauth2 handshake with Wepay and get's the access token for future comunications with Wepay.
 
 Finally, your checkout controller (or some controller that will interact with the Wepay API):
 
-class Purchase::CheckoutController < ApplicationController
-  before_filter :authenticate_account!
+    class Purchase::CheckoutController < ApplicationController
+      before_filter :authenticate_account!
 
-  def index
-    if current_user.has_wepay_auth_code?
-      if wepay_access_token_exists?
-        # Send payment off to wepay or get the user or something else
-        render :json => gateway.wepay_user
-        return
-      else
-        initialize_wepay_access_token(current_user.wepay_auth_code)
+      def index
+        if current_user.has_wepay_auth_code?
+          if wepay_access_token_exists?
+            # Send payment off to wepay or get the user or something else
+            render :json => gateway.wepay_user
+            return
+          else
+            initialize_wepay_access_token(current_user.wepay_auth_code)
+          end
+        else
+          redirect_to_wepay_for_auth
+        end
       end
-    else
-      redirect_to_wepay_for_auth
-    end
-  end
 
-  private
-  include WepayRails::Payments
-end
+      private
+      include WepayRails::Payments
+    end
 
 First, we check to see if we have saved the auth code for the user, if so, we next need to see if we have an Oauth2 access token.
 If not, we can initialize the access token. If it is there, go ahead and make an api call - the example above gets the
@@ -65,30 +65,30 @@ wepay_user.
 
 Configuration is done through config/wepay.yml:
 
-production:
-  client_id: <your wepay client id>
-  client_secret: <your wepay client secret code>
-  redirect_uri: "<your callback url in your rails app>"
-  scope: ['refund_payments','collect_payments','view_balance','view_user']
-  #wepay_api_uri: "https://api.wepay.com"
-  wepay_api_uri: "https://stage.wepay.com"
-  wepay_api_version: "v2"
+    production:
+        client_id: <your wepay client id>
+        client_secret: <your wepay client secret code>
+        redirect_uri: "<your callback url in your rails app>"
+        scope: ['refund_payments','collect_payments','view_balance','view_user']
+        #wepay_api_uri: "https://api.wepay.com"
+        wepay_api_uri: "https://stage.wepay.com"
+        wepay_api_version: "v2"
 
-development:
-  client_id: 12345
-  client_secret: 12345asdfg
-  redirect_uri: "http://www.example.com/wepay/authorize"
-  scope: ['refund_payments','collect_payments','view_balance','view_user']
-  wepay_api_uri: "https://stage.wepay.com"
-  wepay_api_version: "v2"
+    development:
+      client_id: 12345
+      client_secret: 12345asdfg
+      redirect_uri: "http://www.example.com/wepay/authorize"
+      scope: ['refund_payments','collect_payments','view_balance','view_user']
+      wepay_api_uri: "https://stage.wepay.com"
+      wepay_api_version: "v2"
 
-test:
-  client_id: 12345
-  client_secret: 12345asdfg
-  redirect_uri: "http://www.example.com/wepay/authorize"
-  scope: ['refund_payments','collect_payments','view_balance','view_user']
-  wepay_api_uri: "https://stage.wepay.com"
-  wepay_api_version: "v2"
+    test:
+      client_id: 12345
+      client_secret: 12345asdfg
+      redirect_uri: "http://www.example.com/wepay/authorize"
+      scope: ['refund_payments','collect_payments','view_balance','view_user']
+      wepay_api_uri: "https://stage.wepay.com"
+      wepay_api_version: "v2"
 
 
 
