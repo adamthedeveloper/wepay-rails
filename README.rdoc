@@ -45,7 +45,7 @@ Finally, your checkout controller (or some controller that will interact with th
         if current_user.has_wepay_auth_code?
           if wepay_access_token_exists?
             # Send payment off to wepay or get the user or something else
-            render :json => gateway.wepay_user
+            render :json => wepay_gateway.wepay_user
             return
           else
             initialize_wepay_access_token(current_user.wepay_auth_code)
