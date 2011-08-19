@@ -22,15 +22,15 @@ One is for handling the Oauth handshake. I called mine authorize_controller.rb
 Another is for handling IPN (Instant Payment Notifications) - for me, it's ipn_controller.rb
 
 I created a directory under my controllers directory called wepay so I can keep my wepay callback controllers in one place.
-    app
-      L controllers
-                  L wepay
-                        L application_controller.rb
-                        L authorize_controller.rb
-                        L ipn_controller.rb
-                  L purchase
-                        L checkout_controller.rb
-                        L finalize_controller.rb
+  app
+    |_ controllers
+                 |_ wepay
+                        |_ application_controller.rb
+                        |_ authorize_controller.rb
+                        |_ipn_controller.rb
+                 |_ purchase
+                        |_checkout_controller.rb
+                        |_finalize_controller.rb
 
     class Wepay::ApplicationController < ApplicationController
         include WepayRails::Payments
