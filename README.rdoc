@@ -17,79 +17,134 @@ Your model:
 
 Adding wepayable to your model also adds some helpful methods to your model, like save_<your column name>
 
-You'll need a controller and action for wepay to call back - add the entry to your routes file:
+You will have to set up a few new controllers to handle callbacks from wepay.
+One is for handling the Oauth handshake. I called mine authorize_controller.rb
+Another is for handling IPN (Instant Payment Notifications) - for me, it's ipn_controller.rb
 
-    class Wepay::AuthorizeController < ApplicationController
-      before_filter :authenticate_account!
+I created a directory under my controllers directory called wepay so I can keep my wepay callback controllers in one place.
+    app
+      L controllers
+                  L wepay
+                        L application_controller.rb
+                        L authorize_controller.rb
+                        L ipn_controller.rb
+                  L purchase
+                        L checkout_controller.rb
+                        L finalize_controller.rb
 
-      def index
-        current_user.save_wepay_auth_code params[:code]
-        initialize_wepay_access_token(params[:code])
-
-        redirect_to purchase_checkout_index_path
-      end
-
-      private
-      include WepayRails::Payments
+    class Wepay::ApplicationController < ApplicationController
+        include WepayRails::Payments
     end
+
+    class Wepay::AuthorizeController < Wepay::ApplicationController
+        before_filter :authenticate_account! # I use devise
+        def index
+            current_profile.save_wepay_auth_code params[:code]
+            initialize_wepay_access_token(params[:code])
+
+            redirect_to purchase_checkout_index_path
+        end
+    end
+
+    class IpnController < Wepay::ApplicationController
+        def index
+            #Do something with the instant payment notifications back from Wepay
+        end
+    end
+
+Routes for these:
+    namespace :wepay do
+        resources :authorize, :only => [:index]
+        resources :ipn, :only => [:index]
+    end
+
+wepay.yml will also need these directives. See the section on wepay.yml
 
 When you include WepayRails::Payments, you get the controller actions you need. For instance, initialize_wepay_access_token(auth_code)
 which completes the Oauth2 handshake with Wepay and get's the access token for future comunications with Wepay.
 
 Finally, your checkout controller (or some controller that will interact with the Wepay API):
 
-    class Purchase::CheckoutController < ApplicationController
-      before_filter :authenticate_account!
+    class Purchase::CheckoutController < Purchase::PurchaseController
+        before_filter :authenticate_account!
 
-      def index
-        if current_user.has_wepay_auth_code?
-          if wepay_access_token_exists?
-            # Send payment off to wepay or get the user or something else
-            render :json => wepay_gateway.wepay_user
-            return
-          else
-            initialize_wepay_access_token(current_user.wepay_auth_code)
-          end
-        else
-          redirect_to_wepay_for_auth
+        def index
+            if current_profile.wepay_auth_code.present? # Semi-permanent code used to get the Oauth Access Token
+                if wepay_access_token_exists? # Temporary Oauth Access token from wepay
+
+                    cart = current_account.cart # EXAMPLE - get my shopping cart
+                    tx_id = cart.init_transaction # EXAMPLE - I use a transaction table to capture attempts to checkout
+
+                    checkout_params = {
+                        :amount => cart.grand_total,
+                        :short_description => cart.short_description,
+                        :long_description => cart.long_description,
+                        :callback_uri => purchase_finalize_index_url(:txID => tx_id) # Wepay redirects the user back to this url after purchase
+                    }
+
+                    init_checkout_and_send_user_to_wepay(checkout_params) # Send the customer to wepay to finish payment
+                else
+                    initialize_wepay_access_token(current_profile.wepay_auth_code) # No access token - so go get one
+                end
+            else
+                redirect_to_wepay_for_auth # Customer doesn't have an auth code yet from Wepay - so go get one
+            end
         end
-      end
+    end
 
-      private
-      include WepayRails::Payments
+The controller I use for finalizing the checkout - AKA - the controller the user is sent back to after his/her trip to
+wepay.
+    class Purchase::FinalizeController < ApplicationController
+        def index
+            Do something - the user has come back from wepay and need an acknowlegement or something.
+        end
+    end
+
+Example Routes for these:
+    namespace :purchase do
+        resource :cart, :has_many => :purchase_items
+        resources :checkout, :only => [:index]
+        resources :finalize, :only => [:index]
     end
 
 First, we check to see if we have saved the auth code for the user, if so, we next need to see if we have an Oauth2 access token.
-If not, we can initialize the access token. If it is there, go ahead and make an api call - the example above gets the
-wepay_user.
+If not, we can initialize the access token. If it is there, go ahead and make an api call - the example above initiates a checkout.
 
 Configuration is done through config/wepay.yml:
-
     production:
         client_id: <your wepay client id>
-        client_secret: <your wepay client secret code>
-        redirect_uri: "<your callback url in your rails app>"
+        client_secret: <your wepay client secret>
+        authorize_redirect_uri: "http://prod.example.com/wepay/authorize"
         scope: ['refund_payments','collect_payments','view_balance','view_user']
-        #wepay_api_uri: "https://api.wepay.com"
+        wepay_api_uri: "https://api.wepay.com"
+        wepay_api_version: "v2"
+        ipn_callback_uri: "http://prod.example.com/wepay/ipn"
+        checkout_redirect_uri: "http://prod.example.com/purchase/finalize"
+        fee_payer: Payee
+        checkout_type: GOODS
+        charge_tax: false
+        app_fee: 0
+        auto_capture: true
+        require_shipping: false
+        shipping_fee: 0
+        charge_tax: false
+    development:
+        client_id: <your dev client id>
+        client_secret: <your dev client secret>
+        redirect_uri: "http://dev.example.com/wepay/authorize"
+        scope: ['refund_payments','collect_payments','view_balance','view_user']
         wepay_api_uri: "https://stage.wepay.com"
         wepay_api_version: "v2"
-
-    development:
-      client_id: 12345
-      client_secret: 12345asdfg
-      redirect_uri: "http://www.example.com/wepay/authorize"
-      scope: ['refund_payments','collect_payments','view_balance','view_user']
-      wepay_api_uri: "https://stage.wepay.com"
-      wepay_api_version: "v2"
-
-    test:
-      client_id: 12345
-      client_secret: 12345asdfg
-      redirect_uri: "http://www.example.com/wepay/authorize"
-      scope: ['refund_payments','collect_payments','view_balance','view_user']
-      wepay_api_uri: "https://stage.wepay.com"
-      wepay_api_version: "v2"
-
+        ipn_callback_uri: "http://dev.example.com/wepay/ipn"
+        checkout_redirect_uri: "http://dev.example.com/purchase/finalize"
+        fee_payer: Payee
+        checkout_type: GOODS
+        charge_tax: false
+        app_fee: 0
+        require_shipping: false
+        shipping_fee: 0
+        charge_tax: false
+        auto_capture: true
 
 
 == Contributing to wepay-rails
