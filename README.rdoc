@@ -27,10 +27,10 @@ I created a directory under my controllers directory called wepay so I can keep 
                  |_ wepay
                         |_ application_controller.rb
                         |_ authorize_controller.rb
-                        |_ipn_controller.rb
+                        |_ ipn_controller.rb
                  |_ purchase
-                        |_checkout_controller.rb
-                        |_finalize_controller.rb
+                        |_ checkout_controller.rb
+                        |_ finalize_controller.rb
 
     class Wepay::ApplicationController < ApplicationController
         include WepayRails::Payments
