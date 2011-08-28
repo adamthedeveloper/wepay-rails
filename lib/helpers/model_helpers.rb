@@ -14,17 +14,17 @@ module WepayRails
       # end
       def wepayable(*args)
         @params = args.last if args.last.is_a?(Hash)
-        @column = args.first.to_s
+        @@wepayable_column ||= args.first.to_s
 
         File.open('/tmp/noisebytes.log','a') {|f| f.write("Args are #{args.inspect}\n")}
-        File.open('/tmp/noisebytes.log','a') {|f| f.write("Column is #{@column}\n")}
+        File.open('/tmp/noisebytes.log','a') {|f| f.write("Column is #{@@wepayable_column}\n")}
 
-        define_method "has_#{@column}?" do
-          "self.#{@column}.present?"
+        define_method "has_#{@@wepayable_column}?" do
+          "self.#{@@wepayable_column}.present?"
         end
 
-        define_method "save_#{@column}" do |value|
-          "self.update_attribute(#{@column}, #{value})"
+        define_method "save_#{@@wepayable_column}" do |value|
+          "self.update_attribute(#{@@wepayable_column}, #{value})"
         end
       end
 
