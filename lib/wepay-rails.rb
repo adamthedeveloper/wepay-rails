@@ -143,6 +143,8 @@ module WepayRails
             :account_id       => wepay_user['account_id']
         }.merge(parms)
 
+        puts defaults.inspect
+
         response = self.class.get("#{@base_uri}/v2/checkout/create", {:headers => wepay_auth_header}.merge!(defaults))
         JSON.parse(response.body)
       end
