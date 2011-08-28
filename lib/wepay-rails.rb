@@ -149,7 +149,6 @@ module WepayRails
             :auto_capture     => @config[:auto_capture] ? 1 : 0,
             :require_shipping => @config[:require_shipping] ? 1 : 0,
             :shipping_fee     => @config[:shipping_fee],
-            :charge_tax       => @config[:charge_tax],
             :account_id       => @config[:account_id]
         }.merge(parms)
 
