@@ -156,7 +156,7 @@ module WepayRails
         File.open('/tmp/noisebytes.log','a') {|f| f.write({:headers => wepay_auth_header}.merge!(defaults).inspect)}
 
 
-        response = self.class.get("#{@base_uri}/checkout/create", {:headers => wepay_auth_header}.merge!(defaults))
+        response = self.class.get("#{@base_uri}/checkout/create", {:headers => wepay_auth_header}.merge!(:query => defaults))
         JSON.parse(response.body)
       end
 
