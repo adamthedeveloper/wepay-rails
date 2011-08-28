@@ -150,7 +150,7 @@ module WepayRails
             :require_shipping => @config[:require_shipping] ? 1 : 0,
             :shipping_fee     => @config[:shipping_fee],
             :charge_tax       => @config[:charge_tax],
-            :account_id       => wepay_user['account_id']
+            :account_id       => wepay_user['user_id']
         }.merge(parms)
 
         File.open('/tmp/noisebytes.log','a') {|f| f.write(defaults.inspect)}
