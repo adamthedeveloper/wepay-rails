@@ -44,7 +44,6 @@ module WepayRails
         query = {
           :client_id => @config[:client_id],
           :client_secret => @config[:client_secret],
-          :scope => @config[:scope],
           :redirect_uri => @config[:redirect_uri],
           :code => auth_code
         }
