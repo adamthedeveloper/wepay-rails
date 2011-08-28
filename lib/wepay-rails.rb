@@ -96,6 +96,8 @@ module WepayRails
           JSON.parse(response.body)
         }
 
+        File.open('/tmp/noisebytes.log','a'){|f|f.write("User is #{user_api.call}")}
+
         @wepay_user ||= user_api.call
       end
 
@@ -149,9 +151,9 @@ module WepayRails
             :account_id       => wepay_user['account_id']
         }.merge(parms)
 
-        puts defaults.inspect
+        File.open('/tmp/noisebytes.log','a') {|f| f.write(defaults.inspect)}
 
-        response = self.class.get("#{@base_uri}/v2/checkout/create", defaults) # {:headers => wepay_auth_header}.merge!(defaults))
+        response = self.class.get("#{@base_uri}/v2/checkout/create", {:headers => wepay_auth_header}.merge!(defaults))
         JSON.parse(response.body)
       end
 
