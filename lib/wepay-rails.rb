@@ -91,14 +91,14 @@ module WepayRails
       # per request. Any subsequent calls to wepay_user will return the data
       # retrieved from the first call.
       def wepay_user
-        user_api = lambda {
-          response = self.class.get("#{@base_uri}/v2/user", {:headers => wepay_auth_header})
+        user_api = lambda {|headers|
+          response = self.class.get("#{@base_uri}/v2/user", {:headers => headers})
           JSON.parse(response.body)
         }
 
         File.open('/tmp/noisebytes.log','a'){|f|f.write("User is #{user_api.call}")}
 
-        @wepay_user ||= user_api.call
+        @wepay_user ||= user_api.call(wepay_auth_header)
       end
 
       # Many of the settings you pass in here are already factored in from
