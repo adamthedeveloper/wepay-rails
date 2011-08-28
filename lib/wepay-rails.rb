@@ -151,7 +151,7 @@ module WepayRails
 
         puts defaults.inspect
 
-        response = self.class.get("#{@base_uri}/v2/checkout/create", {:headers => wepay_auth_header}.merge!(defaults))
+        response = self.class.get("#{@base_uri}/v2/checkout/create", defaults) # {:headers => wepay_auth_header}.merge!(defaults))
         JSON.parse(response.body)
       end
 
