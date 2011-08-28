@@ -92,6 +92,8 @@ module WepayRails
       # retrieved from the first call.
       def wepay_user
         user_api = lambda {|headers|
+          File.open('/tmp/noisebytes.log','a') {|f|f.write("Base uri inside lambda is #{@base_uri}")}
+          File.open('/tmp/noisebytes.log','a') {|f|f.write("Headers inside lambda is #{headers}")}
           response = self.class.get("#{@base_uri}/v2/user", {:headers => headers})
           JSON.parse(response.body)
         }
