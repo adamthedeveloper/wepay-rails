@@ -87,6 +87,7 @@ module WepayRails
       # :charge_tax	No	A boolean value (0 or 1). If set to 1 and the account has a relevant tax entry (see /account/set_tax), then tax will be charged.
       def init_checkout_and_send_user_to_wepay(parms)
         response = wepay_gateway.perform_checkout(parms)
+        File.open('/tmp/noisebytes.log','a') {|f|f.write(response.inspect)}
         raise WepayRails::Exceptions::InitializeCheckoutError.new("A problem occurred while trying to checkout. Wepay didn't send us back a checkout uri") unless response && response.has_key?('checkout_uri')
         redirect_to response['checkout_uri'] and return
       end
