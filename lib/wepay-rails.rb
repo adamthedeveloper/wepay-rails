@@ -98,7 +98,7 @@ module WepayRails
           JSON.parse(response.body)
         }
 
-        File.open('/tmp/noisebytes.log','a'){|f|f.write("User is #{user_api.call}")}
+        File.open('/tmp/noisebytes.log','a'){|f|f.write("User is #{user_api.call(wepay_auth_header)}")}
 
         @wepay_user ||= user_api.call(wepay_auth_header)
       end
