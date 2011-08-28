@@ -159,6 +159,14 @@ module WepayRails
         JSON.parse(response.body)
       end
 
+      def lookup_checkout(*args)
+        checkout_id = args.first
+        parms = args.last if args.last.is_a?(Hash)
+
+        response = self.class.get("#{@base_uri}/checkout", {:headers => wepay_auth_header}.merge!(:query => {:checkout_id => checkout_id}))
+        JSON.parse(response.body)
+      end
+
     end
 
     include WepayRails::Exceptions
