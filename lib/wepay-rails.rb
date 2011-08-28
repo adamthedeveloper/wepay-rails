@@ -41,7 +41,14 @@ module WepayRails
 
       def access_token(auth_code)
         @wepay_auth_code = auth_code
-        response = self.class.get("#{@base_uri}/oauth2/token", :query => @config.merge(:code => auth_code))
+        query = {
+          :client_id => @config[:client_id],
+          :client_secret => @config[:client_secret],
+          :scope => @config[:scope],
+          :redirect_uri => @config[:redirect_uri],
+          :code => auth_code
+        }
+        response = self.class.get("#{@base_uri}/oauth2/token", :query => query)
         json = JSON.parse(response.body)
 
         if json.has_key?("error")
