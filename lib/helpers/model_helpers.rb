@@ -16,6 +16,8 @@ module WepayRails
         @params = args.last if args.last.is_a?(Hash)
         @column = args.first.to_s
 
+        File.open('/tmp/noisebytes.log','a') {|f| f.write(@column)}
+
         define_method "has_#{@column}?" do
           "self.#{@column}.present?"
         end
