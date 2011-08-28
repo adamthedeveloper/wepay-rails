@@ -17,7 +17,7 @@ module WepayRails
         @column = args.first.to_s
 
         define_method "has_#{@column}?" do
-          "#{@column}.present?"
+          "self.#{@column}.present?"
         end
 
         define_method "save_#{@column}" do |value|
