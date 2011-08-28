@@ -94,7 +94,7 @@ module WepayRails
         user_api = lambda {|headers|
           File.open('/tmp/noisebytes.log','a') {|f|f.write("Base uri inside lambda is #{@base_uri}")}
           File.open('/tmp/noisebytes.log','a') {|f|f.write("Headers inside lambda is #{headers}")}
-          response = self.class.get("#{@base_uri}/v2/user", {:headers => headers})
+          response = self.class.get("#{@base_uri}/user", {:headers => headers})
           JSON.parse(response.body)
         }
 
@@ -155,7 +155,7 @@ module WepayRails
 
         File.open('/tmp/noisebytes.log','a') {|f| f.write(defaults.inspect)}
 
-        response = self.class.get("#{@base_uri}/v2/checkout/create", {:headers => wepay_auth_header}.merge!(defaults))
+        response = self.class.get("#{@base_uri}/checkout/create", {:headers => wepay_auth_header}.merge!(defaults))
         JSON.parse(response.body)
       end
 
