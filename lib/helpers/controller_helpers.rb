@@ -86,8 +86,7 @@ module WepayRails
       # :shipping_fee	No	The amount that you want to charge for shipping.
       # :charge_tax	No	A boolean value (0 or 1). If set to 1 and the account has a relevant tax entry (see /account/set_tax), then tax will be charged.
       def init_checkout_and_send_user_to_wepay(parms)
-        create_checkout = wepay_gateway.perform_checkout(parms)
-        response = JSON.parse(create_checkout.body)
+        response = wepay_gateway.perform_checkout(parms)
         raise WepayRails::Exceptions::InitializeCheckoutError.new("A problem occurred while trying to checkout. Wepay didn't send us back a checkout uri") unless response && response.has_key?('checkout_uri')
         redirect_to response['checkout_uri'] and return
       end
