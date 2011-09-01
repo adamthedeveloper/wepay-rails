@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{wepay-rails}
-  s.version = "0.1.71"
+  s.version = "0.1.72"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Adam Medeiros}]
@@ -32,7 +32,6 @@ Gem::Specification.new do |s|
     "lib/examples/wepay.yml",
     "lib/helpers/controller_helpers.rb",
     "lib/helpers/model_helpers.rb",
-    "lib/rails.rb",
     "lib/wepay-rails.rb",
     "test/helper.rb",
     "test/test_wepay-rails.rb",
