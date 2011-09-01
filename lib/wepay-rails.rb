@@ -3,7 +3,7 @@ require 'helpers/model_helpers'
 require 'helpers/controller_helpers'
 module WepayRails
 
-  class Engine < ::Rails::Engine
+  class Engine < Rails::Engine
   end
 
   module Exceptions
