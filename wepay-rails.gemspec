@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{wepay-rails}
-  s.version = "0.1.70"
+  s.version = "0.1.71"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Adam Medeiros}]
-  s.date = %q{2011-08-28}
+  s.date = %q{2011-09-01}
   s.description = %q{Rails gem that interfaces with the WePay API}
   s.email = %q{adammede@gmail.com}
   s.extra_rdoc_files = [
@@ -26,9 +26,13 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "VERSION",
+    "app/controllers/wepay/application_controller.rb",
+    "app/controllers/wepay/ipn_controller.rb",
+    "config/routes.rb",
     "lib/examples/wepay.yml",
     "lib/helpers/controller_helpers.rb",
     "lib/helpers/model_helpers.rb",
+    "lib/rails.rb",
     "lib/wepay-rails.rb",
     "test/helper.rb",
     "test/test_wepay-rails.rb",
