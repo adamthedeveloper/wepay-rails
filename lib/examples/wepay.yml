@@ -1,24 +1,55 @@
 production:
-  client_id: <your wepay client id>
-  client_secret: <your wepay client secret code>
-  redirect_uri: "<your callback url in your rails app>"
+  client_id: <your client_id from wepay>
+  client_secret: <your client_secret from wepay>
+  authorize_redirect_uri: "http://www.example.com/wepay/authorize"
   scope: ['refund_payments','collect_payments','view_balance','view_user']
   #wepay_api_uri: "https://api.wepay.com"
   wepay_api_uri: "https://stage.wepay.com"
   wepay_api_version: "v2"
-
+  ipn_callback_uri: "http://www.example.com/wepay/ipn"
+  checkout_redirect_uri: "http://www.noisebytes.com/purchase/finalize"
+  fee_payer: Payee
+  checkout_type: GOODS
+  charge_tax: false
+  app_fee: 0
+  auto_capture: true
+  require_shipping: false
+  shipping_fee: 0
+  charge_tax: false
+  wepay_checkout_model: WepayCheckoutRecord
 development:
-  client_id: 12345
-  client_secret: 12345asdfg
-  redirect_uri: "http://www.example.com/wepay/authorize"
+  client_id: <your client_id from wepay>
+  client_secret: <your client_secret from wepay>
+  redirect_uri: "http://dev.noisebytes.com/wepay/authorize"
   scope: ['refund_payments','collect_payments','view_balance','view_user']
   wepay_api_uri: "https://stage.wepay.com"
   wepay_api_version: "v2"
-
+  ipn_callback_uri: "http://dev.noisebytes.com/wepay/ipn"
+  checkout_redirect_uri: "http://dev.noisebytes.com/purchase/finalize"
+  fee_payer: Payee
+  checkout_type: GOODS
+  charge_tax: false
+  app_fee: 0
+  require_shipping: false
+  shipping_fee: 0
+  charge_tax: false
+  auto_capture: true
+  wepay_checkout_model: WepayCheckoutRecord
 test:
-  client_id: 12345
-  client_secret: 12345asdfg
-  redirect_uri: "http://www.example.com/wepay/authorize"
+  client_id: <your client_id from wepay>
+  client_secret: <your client_secret from wepay>
+  redirect_uri: "http://dev.noisebytes.com/wepay/authorize"
   scope: ['refund_payments','collect_payments','view_balance','view_user']
   wepay_api_uri: "https://stage.wepay.com"
   wepay_api_version: "v2"
+  ipn_callback_uri: "http://test.noisebytes.com/wepay/ipn"
+  checkout_redirect_uri: "http://dev.noisebytes.com/purchase/finalize"
+  fee_payer: Payee
+  checkout_type: GOODS
+  charge_tax: false
+  app_fee: 0
+  auto_capture: true
+  charge_tax: false
+  require_shipping: false
+  shipping_fee: 0
+  wepay_checkout_model: WepayCheckoutRecord

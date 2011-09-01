@@ -3,6 +3,9 @@ require 'helpers/model_helpers'
 require 'helpers/controller_helpers'
 module WepayRails
 
+  class Engine < ::Rails::Engine
+  end
+
   module Exceptions
     class AccessTokenError < StandardError; end
     class ExpiredTokenError < StandardError; end
