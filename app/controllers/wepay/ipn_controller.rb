@@ -1,6 +1,10 @@
 class Wepay::IpnController < Wepay::ApplicationController
   def index
 
+    checkout = wepay_gateway.lookup_checkout(params[:checkout_id])
+
+    File.open('/tmp/wepay.log','a') {|f| f.write(checkout.inspect)}
+
     puts "*"*50
     puts @config.inspect
     puts "*"*50
@@ -12,7 +16,7 @@ class Wepay::IpnController < Wepay::ApplicationController
     record = klass.find_by_checkout_id(params[:checkout_id])
 
     if record.present?
-      record.update_attributes(params)
+      record.update_attributes(checkout)
     else
       model = klass.new
       model.save!
