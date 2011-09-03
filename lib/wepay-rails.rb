@@ -30,6 +30,7 @@ module WepayRails
         @wepay_access_token = args.first
 
         yml = Rails.root.join('config', 'wepay.yml').to_s
+	File.open('/tmp/wepay.log','a') {|f|f.write(yml)}
         @config = YAML.load_file(yml)[Rails.env].symbolize_keys
 
         @scope = @config.delete(:scope)
