@@ -2,5 +2,6 @@
 Rails.application.routes.draw do |map|
   namespace :wepay do
     resources :ipn
+    resources :authorize
   end
 end

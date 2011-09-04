@@ -13,18 +13,21 @@ module WepayRails
       #   wepayable :wepay_auth_code
       # end
       def wepayable(*args)
-        @params = args.last if args.last.is_a?(Hash)
-        @@wepayable_column ||= args.first.to_s
 
-        define_method "has_#{@@wepayable_column}?" do
-          self.send(@@wepayable_column.to_sym).present?
+        # @wepayable_column is initilized in the Rails::Engine now
+        # and pulled from the wepay.yml file
+        define_method "has_#{@wepayable_column}?" do
+          self.send(@wepayable_column.to_sym).present?
         end
 
-        define_method "save_#{@@wepayable_column}" do |value|
-          self.update_attribute(@@wepayable_column.to_sym, value)
+        define_method "save_#{@wepayable_column}" do |value|
+          self.update_attribute(@wepayable_column.to_sym, value)
         end
       end
 
+      def wepayable_column
+        @wepayable_column
+      end
     end
   end
 end

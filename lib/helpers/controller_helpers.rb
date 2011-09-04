@@ -2,8 +2,8 @@ module WepayRails
   module Helpers
     module ControllerHelpers
 
-      def redirect_to_wepay_for_auth(scope=wepay_gateway.scope)
-        redirect_to wepay_gateway.auth_code_url(scope)
+      def redirect_to_wepay_for_auth(wepayable_object, scope=wepay_gateway.scope)
+        redirect_to wepay_gateway.auth_code_url(wepayable_object, scope)
       end
 
       # @deprecated Use wepay_gateway instead of gateway
@@ -55,17 +55,17 @@ module WepayRails
       # so when this method is called. The following list of key values are pulled
       # in for you from your wepay.yml file:
       #
-      # Note: @config is your wepay.yml as a Hash
-      # :callback_uri     => @config[:ipn_callback_uri],
-      # :redirect_uri     => @config[:checkout_redirect_uri],
-      # :fee_payer        => @config[:fee_payer],
-      # :type             => @config[:checkout_type],
-      # :charge_tax       => @config[:charge_tax] ? 1 : 0,
-      # :app_fee          => @config[:app_fee],
-      # :auto_capture     => @config[:auto_capture] ? 1 : 0,
-      # :require_shipping => @config[:require_shipping] ? 1 : 0,
-      # :shipping_fee     => @config[:shipping_fee],
-      # :charge_tax       => @config[:charge_tax],
+      # Note: @wepay_config is your wepay.yml as a Hash
+      # :callback_uri     => @wepay_config[:ipn_callback_uri],
+      # :redirect_uri     => @wepay_config[:checkout_redirect_uri],
+      # :fee_payer        => @wepay_config[:fee_payer],
+      # :type             => @wepay_config[:checkout_type],
+      # :charge_tax       => @wepay_config[:charge_tax] ? 1 : 0,
+      # :app_fee          => @wepay_config[:app_fee],
+      # :auto_capture     => @wepay_config[:auto_capture] ? 1 : 0,
+      # :require_shipping => @wepay_config[:require_shipping] ? 1 : 0,
+      # :shipping_fee     => @wepay_config[:shipping_fee],
+      # :charge_tax       => @wepay_config[:charge_tax],
       # :account_id       => wepay_user['account_id'] # wepay-rails goes and gets this for you, but you can override it if you want to.
       #
       #

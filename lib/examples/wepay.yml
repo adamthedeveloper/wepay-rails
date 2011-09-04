@@ -1,7 +1,9 @@
 production:
   client_id: <your client_id from wepay>
   client_secret: <your client_secret from wepay>
-  authorize_redirect_uri: "http://www.example.com/wepay/authorize"
+  auth_code_location: MyModel.wepay_auth_code
+  redirect_uri: "http://www.example.com/wepay/authorize"
+  after_authorize_redirect_uri: "http://www.example.com/purchase/checkout"
   scope: ['refund_payments','collect_payments','view_balance','view_user']
   #wepay_api_uri: "https://api.wepay.com"
   wepay_api_uri: "https://stage.wepay.com"
@@ -19,7 +21,9 @@ production:
 development:
   client_id: <your client_id from wepay>
   client_secret: <your client_secret from wepay>
+  auth_code_location: MyModel.wepay_auth_code
   redirect_uri: "http://dev.noisebytes.com/wepay/authorize"
+  after_authorize_redirect_uri: "http://www.example.com/purchase/checkout"
   scope: ['refund_payments','collect_payments','view_balance','view_user']
   wepay_api_uri: "https://stage.wepay.com"
   wepay_api_version: "v2"
@@ -36,7 +40,9 @@ development:
 test:
   client_id: <your client_id from wepay>
   client_secret: <your client_secret from wepay>
+  auth_code_location: MyModel.wepay_auth_code
   redirect_uri: "http://dev.noisebytes.com/wepay/authorize"
+  after_authorize_redirect_uri: "http://www.example.com/purchase/checkout"
   scope: ['refund_payments','collect_payments','view_balance','view_user']
   wepay_api_uri: "https://stage.wepay.com"
   wepay_api_version: "v2"

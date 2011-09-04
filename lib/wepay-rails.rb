@@ -4,12 +4,20 @@ require 'helpers/controller_helpers'
 module WepayRails
 
   class Engine < Rails::Engine
+    # Initializers
+    initializer "WepayRails.initialize_wepay_rails" do |app|
+      yml = Rails.root.join('config', 'wepay.yml').to_s
+      @wepay_config = YAML.load_file(yml)[Rails.env].symbolize_keys
+      klass, @wepayable_column = @wepay_config[:auth_code_location].split('.')
+      @wepayable_class = eval(klass)
+    end
   end
 
   module Exceptions
     class AccessTokenError < StandardError; end
     class ExpiredTokenError < StandardError; end
     class InitializeCheckoutError < StandardError; end
+    class AuthorizationError < StandardError; end
   end
 
   module Payments
@@ -29,15 +37,15 @@ module WepayRails
       def initialize(*args)
         @wepay_access_token = args.first
 
-        yml = Rails.root.join('config', 'wepay.yml').to_s
-        @config = YAML.load_file(yml)[Rails.env].symbolize_keys
+        #yml = Rails.root.join('config', 'wepay.yml').to_s
+        #@config = YAML.load_file(yml)[Rails.env].symbolize_keys
 
-        @scope = @config.delete(:scope)
+        @scope = @wepay_config.delete(:scope)
 
         # Build the base uri
         # Default if there isn't a setting for version and/or api uri
-        version = @config[:wepay_api_version].present? ? @config[:wepay_api_version] : "v2"
-        api_uri = @config[:wepay_api_uri].present? ? @config[:wepay_api_uri] : "https://wepayapi.com"
+        version = @wepay_config[:wepay_api_version].present? ? @wepay_config[:wepay_api_version] : "v2"
+        api_uri = @wepay_config[:wepay_api_uri].present? ? @wepay_config[:wepay_api_uri] : "https://wepayapi.com"
 
         @base_uri = "#{api_uri}/#{version}"
       end
@@ -45,9 +53,9 @@ module WepayRails
       def access_token(auth_code)
         @wepay_auth_code = auth_code
         query = {
-          :client_id => @config[:client_id],
-          :client_secret => @config[:client_secret],
-          :redirect_uri => @config[:redirect_uri],
+          :client_id => @wepay_config[:client_id],
+          :client_secret => @wepay_config[:client_secret],
+          :redirect_uri => @wepay_config[:redirect_uri],
           :code => auth_code
         }
         response = self.class.get("#{@base_uri}/oauth2/token", :query => query)
@@ -65,11 +73,22 @@ module WepayRails
         @wepay_access_token = json["access_token"]
       end
 
-      # Get the auth code for the customer
+      # Get the auth code url that will be used to fetch the auth code for the customer
       # arguments are the redirect_uri and an array of permissions that your application needs
       # ex. ['manage_accounts','collect_payments','view_balance','view_user']
-      def auth_code_url(permissions)
-        params = @config.merge(:scope => permissions.join(','))
+      def auth_code_url(wepayable_object, permissions)
+        params = @wepay_config.merge(:scope => permissions.join(','))
+
+        # Initially set a reference ID to the column created for the wepayable
+        # so that when the redirect back from wepay happens, we can reference
+        # the original wepayable, and then save the new auth code into the reference ID's
+        # place
+        ref_id = Digest::SHA1.hexdigest("#{Time.now.to_i+rand(4)}")
+
+        wepayable_object.update_attribute(wepayable_object.wepayable_column.to_sym, ref_id)
+
+        params[:authorize_redirect_uri] += (params[:authorize_redirect_uri] =~ /\?/ ? "&" : "?") + "refID=#{ref_id}"
+        params[:authorize_redirect_uri] = CGI::escape(params[:authorize_redirect_uri])
 
         query = params.map do |k, v|
           "#{k.to_s}=#{v}"
@@ -79,7 +98,7 @@ module WepayRails
       end
 
       def token_url
-        query = @config.map do |k, v|
+        query = @wepay_config.map do |k, v|
           "#{k.to_s}=#{v}"
         end.join('&')
 
@@ -107,17 +126,17 @@ module WepayRails
       # so when this method is called. The following list of key values are pulled
       # in for you from your wepay.yml file:
       #
-      # Note: @config is your wepay.yml as a Hash
-      # :callback_uri     => @config[:ipn_callback_uri],
-      # :redirect_uri     => @config[:checkout_redirect_uri],
-      # :fee_payer        => @config[:fee_payer],
-      # :type             => @config[:checkout_type],
-      # :charge_tax       => @config[:charge_tax] ? 1 : 0,
-      # :app_fee          => @config[:app_fee],
-      # :auto_capture     => @config[:auto_capture] ? 1 : 0,
-      # :require_shipping => @config[:require_shipping] ? 1 : 0,
-      # :shipping_fee     => @config[:shipping_fee],
-      # :charge_tax       => @config[:charge_tax],
+      # Note: @wepay_config is your wepay.yml as a Hash
+      # :callback_uri     => @wepay_config[:ipn_callback_uri],
+      # :redirect_uri     => @wepay_config[:checkout_redirect_uri],
+      # :fee_payer        => @wepay_config[:fee_payer],
+      # :type             => @wepay_config[:checkout_type],
+      # :charge_tax       => @wepay_config[:charge_tax] ? 1 : 0,
+      # :app_fee          => @wepay_config[:app_fee],
+      # :auto_capture     => @wepay_config[:auto_capture] ? 1 : 0,
+      # :require_shipping => @wepay_config[:require_shipping] ? 1 : 0,
+      # :shipping_fee     => @wepay_config[:shipping_fee],
+      # :charge_tax       => @wepay_config[:charge_tax],
       # :account_id       => wepay_user['account_id'] # wepay-rails goes and gets this for you, but you can override it if you want to.
       #
       #
@@ -139,16 +158,16 @@ module WepayRails
       # :charge_tax	No	A boolean value (0 or 1). If set to 1 and the account has a relevant tax entry (see /account/set_tax), then tax will be charged.
       def perform_checkout(parms)
         defaults = {
-            :callback_uri     => @config[:ipn_callback_uri],
-            :redirect_uri     => @config[:checkout_redirect_uri],
-            :fee_payer        => @config[:fee_payer],
-            :type             => @config[:checkout_type],
-            :charge_tax       => @config[:charge_tax] ? 1 : 0,
-            :app_fee          => @config[:app_fee],
-            :auto_capture     => @config[:auto_capture] ? 1 : 0,
-            :require_shipping => @config[:require_shipping] ? 1 : 0,
-            :shipping_fee     => @config[:shipping_fee],
-            :account_id       => @config[:account_id]
+            :callback_uri     => @wepay_config[:ipn_callback_uri],
+            :redirect_uri     => @wepay_config[:checkout_redirect_uri],
+            :fee_payer        => @wepay_config[:fee_payer],
+            :type             => @wepay_config[:checkout_type],
+            :charge_tax       => @wepay_config[:charge_tax] ? 1 : 0,
+            :app_fee          => @wepay_config[:app_fee],
+            :auto_capture     => @wepay_config[:auto_capture] ? 1 : 0,
+            :require_shipping => @wepay_config[:require_shipping] ? 1 : 0,
+            :shipping_fee     => @wepay_config[:shipping_fee],
+            :account_id       => @wepay_config[:account_id]
         }.merge(parms)
 
         response = self.class.get("#{@base_uri}/checkout/create", {:headers => wepay_auth_header}.merge!(:query => defaults))
