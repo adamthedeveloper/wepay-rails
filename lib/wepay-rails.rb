@@ -11,10 +11,10 @@ module WepayRails
       yml = Rails.root.join('config', 'wepay.yml').to_s
       @wepay_config = YAML.load_file(yml)[Rails.env].symbolize_keys
       init_log.puts @wepay_config.inspect
-      klass, @wepayable_column = @wepay_config[:auth_code_location].split('.')
+      klass, @@wepayable_column = @wepay_config[:auth_code_location].split('.')
       init_log.puts "Class is #{klass}"
-      init_log.puts "Wepayable Column is #{@wepayable_column}"
-      @wepayable_class = eval(klass)
+      init_log.puts "Wepayable Column is #{@@wepayable_column}"
+      @@wepayable_class = eval(klass)
     end
   end
 
