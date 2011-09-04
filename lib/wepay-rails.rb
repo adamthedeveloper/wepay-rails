@@ -6,9 +6,14 @@ module WepayRails
   class Engine < Rails::Engine
     # Initializers
     initializer "WepayRails.initialize_wepay_rails" do |app|
+      init_log = File.open('/tmp/wepay-rails-init.log','w')
+      init_log.puts "Inside initializer"
       yml = Rails.root.join('config', 'wepay.yml').to_s
       @wepay_config = YAML.load_file(yml)[Rails.env].symbolize_keys
+      init_log.puts @wepay_config.inspect
       klass, @wepayable_column = @wepay_config[:auth_code_location].split('.')
+      init_log.puts "Class is #{klass}"
+      init_log.puts "Wepayable Column is #{@wepayable_column}"
       @wepayable_class = eval(klass)
     end
   end
