@@ -16,7 +16,6 @@ production:
   require_shipping: false
   shipping_fee: 0
   charge_tax: false
-  wepay_checkout_model: WepayCheckoutRecord
 development:
   client_id: <your client_id from wepay>
   client_secret: <your client_secret from wepay>
@@ -34,7 +33,6 @@ development:
   shipping_fee: 0
   charge_tax: false
   auto_capture: true
-  wepay_checkout_model: WepayCheckoutRecord
 test:
   client_id: <your client_id from wepay>
   client_secret: <your client_secret from wepay>
@@ -52,4 +50,3 @@ test:
   charge_tax: false
   require_shipping: false
   shipping_fee: 0
-  wepay_checkout_model: WepayCheckoutRecord
