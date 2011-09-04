@@ -17,27 +17,62 @@ Your model:
 
 Adding wepayable to your model also adds some helpful methods to your model, like save_<your column name>
 
-You will have to set up a few new controllers to handle callbacks from wepay.
+You need to also create a new model called WepayCheckoutRecord. In future versions, I'll include a generator - but for now, here's the migration to use:
+
+    class CreateWepayCheckoutRecords < ActiveRecord::Migration
+        def self.up
+
+            create_table :wepay_checkout_records do |t|
+                t.integer :checkout_id
+                t.integer :account_id
+                t.string :auth_code
+                t.string :state
+                t.string :short_description
+                t.text :long_description
+                t.string :currency
+                t.decimal :amount
+                t.decimal :app_fee
+                t.string :fee_payer
+                t.decimal :gross
+                t.decimal :fee
+                t.string :reference_id
+                t.text :redirect_uri
+                t.text :callback_uri
+                t.text :checkout_uri
+                t.string :payer_email
+                t.string :payer_name
+                t.text :cancel_reason
+                t.text :refund_reason
+                t.boolean :auto_capture
+                t.boolean :require_shipping
+                t.text :shipping_address
+                t.decimal :tax
+
+                t.timestamps
+            end
+
+            add_index :wepay_checkout_records, :checkout_id
+        end
+
+        def self.down
+            drop_table :wepay_checkout_records
+        end
+    end
+
+
+You will have to set up a few new controllers to handle callbacks and redirects from wepay back to your app.
 One is for handling the Oauth handshake. I called mine authorize_controller.rb
-Another is for handling IPN (Instant Payment Notifications) - for me, it's ipn_controller.rb
 
 I created a directory under my controllers directory called wepay so I can keep my wepay callback controllers in one place.
   app
     |_ controllers
                  |_ wepay
-                        |_ application_controller.rb
                         |_ authorize_controller.rb
-                        |_ ipn_controller.rb
                  |_ purchase
                         |_ checkout_controller.rb
                         |_ finalize_controller.rb
 
-    class Wepay::ApplicationController < ApplicationController
-        include WepayRails::Payments
-    end
-
     class Wepay::AuthorizeController < Wepay::ApplicationController
-        before_filter :authenticate_account! # I use devise
         def index
             current_profile.save_wepay_auth_code params[:code]
             initialize_wepay_access_token(params[:code])
@@ -45,6 +80,10 @@ I created a directory under my controllers directory called wepay so I can keep 
             redirect_to purchase_checkout_index_path
         end
     end
+
+The wepay-rails gem comes with an IpnController already built in for
+handling requests from wepay about a specific checkout. If you wish to override it,
+you can create an IpnController in your rails app.
 
     class IpnController < Wepay::ApplicationController
         def index
@@ -55,7 +94,6 @@ I created a directory under my controllers directory called wepay so I can keep 
 Routes for these:
     namespace :wepay do
         resources :authorize, :only => [:index]
-        resources :ipn, :only => [:index]
     end
 
 wepay.yml will also need these directives. See the section on wepay.yml
@@ -73,13 +111,13 @@ Finally, your checkout controller (or some controller that will interact with th
                 if wepay_access_token_exists? # Temporary Oauth Access token from wepay
 
                     cart = current_account.cart # EXAMPLE - get my shopping cart
-                    tx_id = cart.init_transaction # EXAMPLE - I use a transaction table to capture attempts to checkout
+                    tx_id = cart.transaction_id # EXAMPLE - I use a column in my cart to have a way to look up the cart upon the user's return from wepay
 
                     checkout_params = {
                         :amount => cart.grand_total,
                         :short_description => cart.short_description,
                         :long_description => cart.long_description,
-                        :callback_uri => purchase_finalize_index_url(:txID => tx_id) # Wepay redirects the user back to this url after purchase
+                        :redirect_uri => purchase_finalize_index_url(:txID => tx_id) # Wepay redirects the user back to this url after purchase
                     }
 
                     init_checkout_and_send_user_to_wepay(checkout_params) # Send the customer to wepay to finish payment
@@ -112,39 +150,57 @@ If not, we can initialize the access token. If it is there, go ahead and make an
 
 Configuration is done through config/wepay.yml:
     production:
-        client_id: <your wepay client id>
-        client_secret: <your wepay client secret>
-        authorize_redirect_uri: "http://prod.example.com/wepay/authorize"
-        scope: ['refund_payments','collect_payments','view_balance','view_user']
-        wepay_api_uri: "https://api.wepay.com"
-        wepay_api_version: "v2"
-        ipn_callback_uri: "http://prod.example.com/wepay/ipn"
-        checkout_redirect_uri: "http://prod.example.com/purchase/finalize"
-        fee_payer: Payee
-        checkout_type: GOODS
-        charge_tax: false
-        app_fee: 0
-        auto_capture: true
-        require_shipping: false
-        shipping_fee: 0
-        charge_tax: false
+      client_id: <your client_id from wepay>
+      client_secret: <your client_secret from wepay>
+      authorize_redirect_uri: "http://www.example.com/wepay/authorize"
+      scope: ['refund_payments','collect_payments','view_balance','view_user']
+      #wepay_api_uri: "https://api.wepay.com"
+      wepay_api_uri: "https://stage.wepay.com"
+      wepay_api_version: "v2"
+      ipn_callback_uri: "http://www.example.com/wepay/ipn"
+      checkout_redirect_uri: "http://www.example.com/purchase/finalize"
+      fee_payer: Payee
+      checkout_type: GOODS
+      charge_tax: false
+      app_fee: 0
+      auto_capture: true
+      require_shipping: false
+      shipping_fee: 0
+      charge_tax: false
     development:
-        client_id: <your dev client id>
-        client_secret: <your dev client secret>
-        redirect_uri: "http://dev.example.com/wepay/authorize"
-        scope: ['refund_payments','collect_payments','view_balance','view_user']
-        wepay_api_uri: "https://stage.wepay.com"
-        wepay_api_version: "v2"
-        ipn_callback_uri: "http://dev.example.com/wepay/ipn"
-        checkout_redirect_uri: "http://dev.example.com/purchase/finalize"
-        fee_payer: Payee
-        checkout_type: GOODS
-        charge_tax: false
-        app_fee: 0
-        require_shipping: false
-        shipping_fee: 0
-        charge_tax: false
-        auto_capture: true
+      client_id: <your client_id from wepay>
+      client_secret: <your client_secret from wepay>
+      redirect_uri: "http://dev.example.com/wepay/authorize"
+      scope: ['refund_payments','collect_payments','view_balance','view_user']
+      wepay_api_uri: "https://stage.wepay.com"
+      wepay_api_version: "v2"
+      ipn_callback_uri: "http://dev.example.com/wepay/ipn"
+      checkout_redirect_uri: "http://dev.example.com/purchase/finalize"
+      fee_payer: Payee
+      checkout_type: GOODS
+      charge_tax: false
+      app_fee: 0
+      require_shipping: false
+      shipping_fee: 0
+      charge_tax: false
+      auto_capture: true
+    test:
+      client_id: <your client_id from wepay>
+      client_secret: <your client_secret from wepay>
+      redirect_uri: "http://dev.example.com/wepay/authorize"
+      scope: ['refund_payments','collect_payments','view_balance','view_user']
+      wepay_api_uri: "https://stage.wepay.com"
+      wepay_api_version: "v2"
+      ipn_callback_uri: "http://test.example.com/wepay/ipn"
+      checkout_redirect_uri: "http://dev.example.com/purchase/finalize"
+      fee_payer: Payee
+      checkout_type: GOODS
+      charge_tax: false
+      app_fee: 0
+      auto_capture: true
+      charge_tax: false
+      require_shipping: false
+      shipping_fee: 0
 
 
 == Contributing to wepay-rails

@@ -30,9 +30,7 @@ module WepayRails
         @wepay_access_token = args.first
 
         yml = Rails.root.join('config', 'wepay.yml').to_s
-	File.open('/tmp/wepay.log','a') {|f| f.write("Yaml for wepay is found at #{yml}")}
         @config = YAML.load_file(yml)[Rails.env].symbolize_keys
-	File.open('/tmp/wepay.log','a') {|f| f.write("config is #{@config.inspect}")}
 
         @scope = @config.delete(:scope)
 
@@ -97,13 +95,9 @@ module WepayRails
       # retrieved from the first call.
       def wepay_user
         user_api = lambda {|headers|
-          File.open('/tmp/noisebytes.log','a') {|f|f.write("Base uri inside lambda is #{@base_uri}")}
-          File.open('/tmp/noisebytes.log','a') {|f|f.write("Headers inside lambda is #{headers}")}
           response = self.class.get("#{@base_uri}/user", {:headers => headers})
           JSON.parse(response.body)
         }
-
-        File.open('/tmp/noisebytes.log','a'){|f|f.write("User is #{user_api.call(wepay_auth_header)}")}
 
         @wepay_user ||= user_api.call(wepay_auth_header)
       end
@@ -156,9 +150,6 @@ module WepayRails
             :shipping_fee     => @config[:shipping_fee],
             :account_id       => @config[:account_id]
         }.merge(parms)
-
-        File.open('/tmp/noisebytes.log','a') {|f| f.write({:headers => wepay_auth_header}.merge!(defaults).inspect)}
-
 
         response = self.class.get("#{@base_uri}/checkout/create", {:headers => wepay_auth_header}.merge!(:query => defaults))
         JSON.parse(response.body)
