@@ -3,7 +3,7 @@ class Wepay::IpnController < Wepay::ApplicationController
 
     wepay_gateway
 
-    log = File.open('/tmp/wepay.log','a')
+    log = File.open('/tmp/ipn.log','a')
 
     log.puts "*"*50
     log.puts @config.inspect
