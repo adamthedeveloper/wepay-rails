@@ -3,20 +3,30 @@ class Wepay::IpnController < Wepay::ApplicationController
 
     wepay_gateway
 
-    puts "*"*50
-    puts @config.inspect
-    puts "*"*50
+    log = File.open('/tmp/wepay.log','a')
 
-    raise StandardError.new("Your wepay.yml isn't being read for some reason") if @config.blank?
-    raise StandardError.new("A model needs to exist to trap the IPN messages from Wepay. Please create a model (eg. WepayCheckoutRecord) and set the class name in your wepay.yml, wepay_checkout_model directive") if @config[:wepay_checkout_model].blank?
+    log.puts "*"*50
+    log.puts @config.inspect
+    log.puts "*"*50
+
+    unless @config
+      raise StandardError.new("Your wepay.yml isn't being read for some reason")
+    end
+
+    unless  @config[:wepay_checkout_model]
+      raise StandardError.new("A model needs to exist to trap the IPN messages from Wepay. Please create a model (eg. WepayCheckoutRecord) and set the class name in your wepay.yml, wepay_checkout_model directive")
+    end
 
     klass = @config[:wepay_checkout_model]
     record = klass.find_by_checkout_id(params[:checkout_id])
 
+    log.puts record.inspect
+
+
     if record.present?
       wepay_gateway.access_token(record.auth_code)
       checkout = wepay_gateway.lookup_checkout(record.checkout_id)
-      File.open('/tmp/wepay.log','a') {|f| f.write(checkout.inspect)}
+      log.puts checkout.inspect
       record.update_attributes(checkout)
     else
       model = klass.new
