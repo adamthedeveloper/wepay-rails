@@ -12,6 +12,18 @@ module WepayRails
       @@wepayable_class, @@wepayable_column = klass, column
       @@settings = settings
     end
+
+    def self.wepayable_class
+      @@wepayable_class
+    end
+
+    def self.wepayable_column
+      @@wepayable_column
+    end
+
+    def self.settings
+      @@settings
+    end
   end
 
   class Engine < Rails::Engine
