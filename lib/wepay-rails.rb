@@ -70,7 +70,7 @@ module WepayRails
         #yml = Rails.root.join('config', 'wepay.yml').to_s
         #@config = YAML.load_file(yml)[Rails.env].symbolize_keys
 
-        @scope = @wepay_config.delete(:scope)
+        @scope = @wepay_config[:scope]
 
         # Build the base uri
         # Default if there isn't a setting for version and/or api uri
