@@ -7,6 +7,11 @@ module WepayRails
     @@wepayable_class = nil
     @@wepayable_column = nil
     @@settings = nil
+
+    def self.init_conf(klass, column, settings)
+      @@wepayable_class, @@wepayable_column = klass, column
+      @@settings = settings
+    end
   end
 
   class Engine < Rails::Engine
@@ -15,12 +20,12 @@ module WepayRails
       init_log = File.open('/tmp/wepay-rails-init.log','w')
       init_log.puts "Inside initializer"
       yml = Rails.root.join('config', 'wepay.yml').to_s
-      Configuration.settings = YAML.load_file(yml)[Rails.env].symbolize_keys
-      init_log.puts Configuration.settings.inspect
-      klass, Configuration.wepayable_column = Configuration.settings[:auth_code_location].split('.')
+      settings = YAML.load_file(yml)[Rails.env].symbolize_keys
+      init_log.puts settings.inspect
+      klass, column = settings[:auth_code_location].split('.')
       init_log.puts "Class is #{klass}"
-      init_log.puts "Wepayable Column is #{Configuration.wepayable_column}"
-      Configuration.wepayable_class = eval(klass)
+      init_log.puts "Wepayable Column is #{column}"
+      Configuration.init_conf(eval(klass), column, settings)
     end
   end
 
