@@ -119,8 +119,8 @@ module WepayRails
 
         wepayable_object.update_attribute(WepayRails::Configuration.wepayable_column.to_sym, ref_id)
 
-        parms[:authorize_redirect_uri] += (parms[:authorize_redirect_uri] =~ /\?/ ? "&" : "?") + "refID=#{ref_id}"
-        parms[:authorize_redirect_uri] = CGI::escape(parms[:authorize_redirect_uri])
+        parms[:redirect_uri] += (parms[:redirect_uri] =~ /\?/ ? "&" : "?") + "refID=#{ref_id}"
+        parms[:redirect_uri] = CGI::escape(parms[:redirect_uri])
 
         query = parms.map do |k, v|
           "#{k.to_s}=#{v}"
