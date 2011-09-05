@@ -26,16 +26,10 @@ module WepayRails
       #
       # Response
       # {"user_id":"123456","access_token":"1337h4x0rzabcd12345","token_type":"BEARER"} Example
-      def initialize_wepay_access_token(wepayable_object) #auth_code)
-        iwat_log = File.open('/tmp/init-wepay-access-token.log','w')
-        iwat_log.puts "wepayable_object is #{wepayable_object.inspect}"
-        iwat_log.puts "wepayable_column is #{WepayRails::Configuration.wepayable_column}"
-        auth_code = wepayable_object.send(WepayRails::Configuration.wepayable_column.to_sym)
-        iwat_log.puts "Auth code was #{auth_code}"
-        session[unique_wepay_access_token_key] = wepay_gateway.access_token(auth_code)
+      def initialize_wepay_access_token(wepayable_object)
+        session[unique_wepay_access_token_key] = wepay_gateway.access_token(wepayable_object)
         return
       rescue WepayRails::Exceptions::ExpiredTokenError => e
-        iwat_log.puts "Exception happened: #{e.message}"
         redirect_to_wepay_for_auth(wepayable_object) and return
       end
 

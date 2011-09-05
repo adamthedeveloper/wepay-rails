@@ -29,16 +29,10 @@ module WepayRails
   class Engine < Rails::Engine
     # Initializers
     initializer "WepayRails.initialize_wepay_rails" do |app|
-      init_log = File.open('/tmp/wepay-rails-init.log','w')
-      init_log.puts "Inside initializer"
       yml = Rails.root.join('config', 'wepay.yml').to_s
       settings = YAML.load_file(yml)[Rails.env].symbolize_keys
-      init_log.puts settings.inspect
       klass, column = settings[:auth_code_location].split('.')
-      init_log.puts "Class is #{klass}"
-      init_log.puts "Wepayable Column is #{column}"
       Configuration.init_conf(eval(klass), column, settings)
-      init_log.puts "Settings in the configuration are #{Configuration.settings.inspect}"
     end
   end
 
@@ -76,10 +70,8 @@ module WepayRails
         @base_uri = "#{api_uri}/#{version}"
       end
 
-      def access_token(auth_code)
-        at_log = File.open('/tmp/access-token.log','a')
-        at_log.puts "Auth code passed in was #{auth_code}"
-        @wepay_auth_code = auth_code
+      def access_token(wepayable_object)
+        auth_code = wepayable_object.send(WepayRails::Configuration.wepayable_column.to_s)
         query = {
           :client_id => @wepay_config[:client_id],
           :client_secret => @wepay_config[:client_secret],
@@ -91,7 +83,10 @@ module WepayRails
 
         if json.has_key?("error")
           if json.has_key?("error_description")
-            raise WepayRails::Exceptions::ExpiredTokenError.new("You will need to get a new authorization code") if json["error_description"] == "the code has expired"
+            if ['invalid code parameter','the code has expired'].include?(json['error_description'])
+              # Go get an auth_code
+              redirect_to_wepay_for_auth(wepayable_object) and return
+            end
             raise WepayRails::Exceptions::AccessTokenError.new(json["error_description"])
           end
         end
@@ -105,12 +100,8 @@ module WepayRails
       # arguments are the redirect_uri and an array of permissions that your application needs
       # ex. ['manage_accounts','collect_payments','view_balance','view_user']
       def auth_code_url(wepayable_object)
-        acu_log = File.open('/tmp/auth-code-url.log','a')
-        acu_log.puts "Inside auth_code_url"
-        acu_log.puts "Settings are #{WepayRails::Configuration.settings.inspect}"
-        acu_log.puts "Scope is #{WepayRails::Configuration.settings[:scope].inspect}"
         parms = @wepay_config.merge(:scope => WepayRails::Configuration.settings[:scope].join(','))
-        acu_log.puts "auth_code parms are #{parms.inspect}"
+
         # Initially set a reference ID to the column created for the wepayable
         # so that when the redirect back from wepay happens, we can reference
         # the original wepayable, and then save the new auth code into the reference ID's
@@ -126,9 +117,7 @@ module WepayRails
           "#{k.to_s}=#{v}"
         end.join('&')
 
-        return "#{@base_uri}/oauth2/authorize?#{query}"
-      rescue => e
-        acu_log.puts "Exception in auth_code_url: #{e.message}"
+        "#{@base_uri}/oauth2/authorize?#{query}"
       end
 
       def token_url
