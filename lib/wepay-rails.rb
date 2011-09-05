@@ -111,6 +111,7 @@ module WepayRails
       def auth_code_url(wepayable_object)
         acu_log = File.open('/tmp/auth-code-url.log','a')
         acu_log.puts "Inside auth_code_url"
+        acu_log.puts "Settings are #{WepayRails::Configuration.settings.inspect}"
         acu_log.puts "Scope is #{WepayRails::Configuration.settings[:scope].inspect}"
         params = @wepay_config.merge(:scope => WepayRails::Configuration.settings[:scope].join(','))
 
