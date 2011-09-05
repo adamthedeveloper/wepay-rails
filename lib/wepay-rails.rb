@@ -67,10 +67,6 @@ module WepayRails
         @wepay_access_token = args.first
 
         @wepay_config = Configuration.settings
-        #yml = Rails.root.join('config', 'wepay.yml').to_s
-        #@config = YAML.load_file(yml)[Rails.env].symbolize_keys
-
-        @scope = @wepay_config[:scope]
 
         # Build the base uri
         # Default if there isn't a setting for version and/or api uri
@@ -113,8 +109,8 @@ module WepayRails
         acu_log.puts "Inside auth_code_url"
         acu_log.puts "Settings are #{WepayRails::Configuration.settings.inspect}"
         acu_log.puts "Scope is #{WepayRails::Configuration.settings[:scope].inspect}"
-        params = @wepay_config.merge(:scope => WepayRails::Configuration.settings[:scope].join(','))
-
+        parms = @wepay_config.merge(:scope => WepayRails::Configuration.settings[:scope].join(','))
+        acu_log.puts "auth_code parms are #{parms.inspect}"
         # Initially set a reference ID to the column created for the wepayable
         # so that when the redirect back from wepay happens, we can reference
         # the original wepayable, and then save the new auth code into the reference ID's
@@ -123,10 +119,10 @@ module WepayRails
 
         wepayable_object.update_attribute(wepayable_object.wepayable_column.to_sym, ref_id)
 
-        params[:authorize_redirect_uri] += (params[:authorize_redirect_uri] =~ /\?/ ? "&" : "?") + "refID=#{ref_id}"
-        params[:authorize_redirect_uri] = CGI::escape(params[:authorize_redirect_uri])
+        parms[:authorize_redirect_uri] += (parms[:authorize_redirect_uri] =~ /\?/ ? "&" : "?") + "refID=#{ref_id}"
+        parms[:authorize_redirect_uri] = CGI::escape(parms[:authorize_redirect_uri])
 
-        query = params.map do |k, v|
+        query = parms.map do |k, v|
           "#{k.to_s}=#{v}"
         end.join('&')
 
