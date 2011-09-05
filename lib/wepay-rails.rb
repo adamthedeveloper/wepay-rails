@@ -80,6 +80,8 @@ module WepayRails
       end
 
       def access_token(auth_code)
+        at_log = File.open('/tmp/access-token.log','a')
+        at_log.puts "Auth code passed in was #{auth_code}"
         @wepay_auth_code = auth_code
         query = {
           :client_id => @wepay_config[:client_id],
