@@ -117,7 +117,7 @@ module WepayRails
         # place
         ref_id = Digest::SHA1.hexdigest("#{Time.now.to_i+rand(4)}")
 
-        wepayable_object.update_attribute(wepayable_object.wepayable_column.to_sym, ref_id)
+        wepayable_object.update_attribute(WepayRails::Configuration.wepayable_column.to_sym, ref_id)
 
         parms[:authorize_redirect_uri] += (parms[:authorize_redirect_uri] =~ /\?/ ? "&" : "?") + "refID=#{ref_id}"
         parms[:authorize_redirect_uri] = CGI::escape(parms[:authorize_redirect_uri])
