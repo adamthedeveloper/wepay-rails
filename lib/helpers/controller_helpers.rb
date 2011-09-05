@@ -35,6 +35,7 @@ module WepayRails
         session[unique_wepay_access_token_key] = wepay_gateway.access_token(auth_code)
         return
       rescue WepayRails::Exceptions::ExpiredTokenError => e
+        iwat_log.puts "Exception happened: #{e.message}"
         redirect_to_wepay_for_auth(wepayable_object) and return
       end
 

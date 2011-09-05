@@ -128,7 +128,9 @@ module WepayRails
           "#{k.to_s}=#{v}"
         end.join('&')
 
-        "#{@base_uri}/oauth2/authorize?#{query}"
+        return "#{@base_uri}/oauth2/authorize?#{query}"
+      rescue => e
+        acu_log.puts "Exception in auth_code_url: #{e.message}"
       end
 
       def token_url
