@@ -109,7 +109,8 @@ module WepayRails
       # arguments are the redirect_uri and an array of permissions that your application needs
       # ex. ['manage_accounts','collect_payments','view_balance','view_user']
       def auth_code_url(wepayable_object)
-        acu_log = File.open('/tmp/auth-code-url.log','w')
+        acu_log = File.open('/tmp/auth-code-url.log','a')
+        acu_log.puts "Inside auth_code_url"
         acu_log.puts "Scope is #{WepayRails::Configuration.settings[:scope].inspect}"
         params = @wepay_config.merge(:scope => WepayRails::Configuration.settings[:scope].join(','))
 
