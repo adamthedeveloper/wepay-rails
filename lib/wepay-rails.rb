@@ -107,8 +107,10 @@ module WepayRails
       # Get the auth code url that will be used to fetch the auth code for the customer
       # arguments are the redirect_uri and an array of permissions that your application needs
       # ex. ['manage_accounts','collect_payments','view_balance','view_user']
-      def auth_code_url(wepayable_object, permissions)
-        params = @wepay_config.merge(:scope => permissions.join(','))
+      def auth_code_url(wepayable_object)
+        acu_log = File.open('/tmp/auth-code-url.log')
+        acu_log.puts "Scope is #{WepayRails::Configuration.settings[:scope].inspect}"
+        params = @wepay_config.merge(:scope => WepayRails::Configuration.settings[:scope].join(','))
 
         # Initially set a reference ID to the column created for the wepayable
         # so that when the redirect back from wepay happens, we can reference
