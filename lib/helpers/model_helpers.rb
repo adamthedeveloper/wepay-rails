@@ -15,21 +15,25 @@ module WepayRails
       def wepayable(*args)
         wepayable_log = File.open('/tmp/wepayable.log','a')
 
-        wepayable_log.puts "Wepayable column is #{@@wepayable_column}"
+        wepayable_log.puts "Wepayable column is #{wepayable_column}"
 
         # @wepayable_column is initilized in the Rails::Engine now
         # and pulled from the wepay.yml file
-        define_method "has_#{@@wepayable_column}?" do
-          self.send(@@wepayable_column.to_sym).present?
+        define_method "has_#{wepayable_column}?" do
+          self.send(wepayable_column.to_sym).present?
         end
 
-        define_method "save_#{@@wepayable_column}" do |value|
-          self.update_attribute(@@wepayable_column.to_sym, value)
+        define_method "save_#{wepayable_column}" do |value|
+          self.update_attribute(wepayable_column.to_sym, value)
         end
       end
 
       def wepayable_column
-        @@wepayable_column
+        WepayRails::Engine.wepayable_column
+      end
+
+      def wepayable_class
+        WepayRails::Engine.wepayable_class
       end
     end
   end
