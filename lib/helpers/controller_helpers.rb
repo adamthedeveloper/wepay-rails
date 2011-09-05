@@ -2,7 +2,7 @@ module WepayRails
   module Helpers
     module ControllerHelpers
 
-      def redirect_to_wepay_for_auth(wepayable_object, scope=wepay_gateway.scope)
+      def redirect_to_wepay_for_auth(wepayable_object, scope=WepayRails::Configuration.settings[:scope])
         redirect_to wepay_gateway.auth_code_url(wepayable_object, scope)
       end
 
@@ -31,7 +31,7 @@ module WepayRails
         session[unique_wepay_access_token_key] = wepay_gateway.access_token(auth_code)
         return
       rescue WepayRails::Exceptions::ExpiredTokenError => e
-        redirect_to_wepay_for_auth(wepay_gateway.scope) and return
+        redirect_to_wepay_for_auth(wepayable_object, WepayRails::Configuration.settings[:scope]) and return
       end
 
       # Since we are saving the access token in the session,
