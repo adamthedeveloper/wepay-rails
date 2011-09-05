@@ -29,11 +29,11 @@ module WepayRails
       end
 
       def wepayable_column
-        WepayRails::Engine.wepayable_column
+        WepayRails::Configuration.wepayable_column
       end
 
       def wepayable_class
-        WepayRails::Engine.wepayable_class
+        WepayRails::Configuration.wepayable_class
       end
     end
   end

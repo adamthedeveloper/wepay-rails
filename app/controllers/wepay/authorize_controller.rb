@@ -7,6 +7,6 @@ class Wepay::AuthorizeController < Wepay::ApplicationController
 
     wepayable.update_attribute(@@wepayable_column.to_sym, params[:code])
 
-    redirect_to @wepay_config[:after_authorize_redirect_uri]
+    redirect_to WepayRails::Configuration.settings[:after_authorize_redirect_uri]
   end
 end

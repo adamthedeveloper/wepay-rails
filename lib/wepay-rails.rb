@@ -3,18 +3,24 @@ require 'helpers/model_helpers'
 require 'helpers/controller_helpers'
 module WepayRails
 
+  class Configuration
+    @@wepayable_class = nil
+    @@wepayable_column = nil
+    @@settings = nil
+  end
+
   class Engine < Rails::Engine
     # Initializers
     initializer "WepayRails.initialize_wepay_rails" do |app|
       init_log = File.open('/tmp/wepay-rails-init.log','w')
       init_log.puts "Inside initializer"
       yml = Rails.root.join('config', 'wepay.yml').to_s
-      @wepay_config = YAML.load_file(yml)[Rails.env].symbolize_keys
-      init_log.puts @wepay_config.inspect
-      klass, @@wepayable_column = @wepay_config[:auth_code_location].split('.')
+      Configuration.settings = YAML.load_file(yml)[Rails.env].symbolize_keys
+      init_log.puts Configuration.settings.inspect
+      klass, Configuration.wepayable_column = Configuration.settings[:auth_code_location].split('.')
       init_log.puts "Class is #{klass}"
-      init_log.puts "Wepayable Column is #{@@wepayable_column}"
-      @@wepayable_class = eval(klass)
+      init_log.puts "Wepayable Column is #{Configuration.wepayable_column}"
+      Configuration.wepayable_class = eval(klass)
     end
   end
 
@@ -42,6 +48,7 @@ module WepayRails
       def initialize(*args)
         @wepay_access_token = args.first
 
+        @wepay_config = Configuration.settings
         #yml = Rails.root.join('config', 'wepay.yml').to_s
         #@config = YAML.load_file(yml)[Rails.env].symbolize_keys
 
