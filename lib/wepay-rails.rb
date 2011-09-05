@@ -38,6 +38,7 @@ module WepayRails
       init_log.puts "Class is #{klass}"
       init_log.puts "Wepayable Column is #{column}"
       Configuration.init_conf(eval(klass), column, settings)
+      init_log.puts "Settings in the configuration are #{Configuration.settings.inspect}"
     end
   end
 
