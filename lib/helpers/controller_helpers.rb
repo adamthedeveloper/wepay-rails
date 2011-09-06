@@ -3,6 +3,14 @@ module WepayRails
     module ControllerHelpers
 
       def redirect_to_wepay_for_auth(wepayable_object)
+        # Initially set a reference ID to the column created for the wepayable
+        # so that when the redirect back from wepay happens, we can reference
+        # the original wepayable, and then save the new auth code into the reference ID's
+        # place
+        ref_id = Digest::SHA1.hexdigest("#{Time.now.to_i+rand(4)}")
+        session[:wepay_auth_code_ref_id] = ref_id
+        wepayable_object.update_attribute(WepayRails::Configuration.wepayable_column.to_sym, ref_id)
+
         redirect_to wepay_gateway.auth_code_url(wepayable_object)
       end
 

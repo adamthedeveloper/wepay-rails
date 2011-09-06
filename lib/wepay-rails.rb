@@ -99,25 +99,13 @@ module WepayRails
       # arguments are the redirect_uri and an array of permissions that your application needs
       # ex. ['manage_accounts','collect_payments','view_balance','view_user']
       def auth_code_url(wepayable_object)
-        parms = @wepay_config.merge(:scope => WepayRails::Configuration.settings[:scope].join(','))
-
-        # Initially set a reference ID to the column created for the wepayable
-        # so that when the redirect back from wepay happens, we can reference
-        # the original wepayable, and then save the new auth code into the reference ID's
-        # place
-        ref_id = Digest::SHA1.hexdigest("#{Time.now.to_i+rand(4)}")
-        session[:wepay_auth_code_ref_id] = ref_id
-        wepayable_object.update_attribute(WepayRails::Configuration.wepayable_column.to_sym, ref_id)
+        parms = {
+          :client_id => @wepay_config[:client_id],
+          :redirect_uri => @wepay_config[:redirect_uri],
+          :scope => WepayRails::Configuration.settings[:scope].join(',')
+        }
 
         query = parms.map do |k, v|
-          "#{k.to_s}=#{v}"
-        end.join('&')
-
-        "#{@base_uri}/oauth2/authorize?#{query}"
-      end
-
-      def token_url
-        query = @wepay_config.map do |k, v|
           "#{k.to_s}=#{v}"
         end.join('&')
 
