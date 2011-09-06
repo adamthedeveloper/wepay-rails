@@ -1,7 +1,7 @@
 class Wepay::AuthorizeController < Wepay::ApplicationController
   def index
     ref_id, code = if params[:refID].include?('?')
-                     parts = query.split('?')
+                     parts = params[:refID].split('?')
                      key,val = parts[1].split('=')
                      [parts[0], (key == 'code' ? val : '')]
                    else
