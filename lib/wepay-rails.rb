@@ -60,7 +60,7 @@ module WepayRails
       def initialize(*args)
         @wepay_access_token = args.first
 
-        @wepay_config = Configuration.settings
+        @wepay_config = WepayRails::Configuration.settings
 
         # Build the base uri
         # Default if there isn't a setting for version and/or api uri
@@ -106,11 +106,8 @@ module WepayRails
         # the original wepayable, and then save the new auth code into the reference ID's
         # place
         ref_id = Digest::SHA1.hexdigest("#{Time.now.to_i+rand(4)}")
-
+        session[:wepay_auth_code_ref_id] = ref_id
         wepayable_object.update_attribute(WepayRails::Configuration.wepayable_column.to_sym, ref_id)
-
-        parms[:redirect_uri] += (parms[:redirect_uri] =~ /\?/ ? "&" : "?") + "refID=#{ref_id}"
-        parms[:redirect_uri] = CGI::escape(parms[:redirect_uri])
 
         query = parms.map do |k, v|
           "#{k.to_s}=#{v}"
