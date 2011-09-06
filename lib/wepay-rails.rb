@@ -84,8 +84,7 @@ module WepayRails
         if json.has_key?("error")
           if json.has_key?("error_description")
             if ['invalid code parameter','the code has expired'].include?(json['error_description'])
-              # Go get an auth_code
-              redirect_to_wepay_for_auth(wepayable_object) and return
+              raise WepayRails::Exceptions::ExpiredTokenError.new("Token either expired or invalid: #{json["error_description"]}")
             end
             raise WepayRails::Exceptions::AccessTokenError.new(json["error_description"])
           end
