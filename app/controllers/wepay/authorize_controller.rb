@@ -7,7 +7,7 @@ class Wepay::AuthorizeController < Wepay::ApplicationController
     #               else
     #                 [params[:refID], params[:code]]
     #               end
-    ref_id = session[:wepay_auth_code_ref_id]
+    ref_id = session[unique_wepay_auth_token_key]
     wepayable = wepayable_class.all(:conditions => ["#{wepayable_column} = ?", ref_id])[0]
     wepayable.update_attribute(wepayable_column.to_sym, params[:code])
     redirect_to WepayRails::Configuration.settings[:after_authorize_redirect_uri]

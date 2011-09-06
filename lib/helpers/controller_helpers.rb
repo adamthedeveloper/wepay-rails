@@ -8,7 +8,7 @@ module WepayRails
         # the original wepayable, and then save the new auth code into the reference ID's
         # place
         ref_id = Digest::SHA1.hexdigest("#{Time.now.to_i+rand(4)}")
-        session[:wepay_auth_code_ref_id] = ref_id
+        session[unique_wepay_auth_token_key] = ref_id
         wepayable_object.update_attribute(WepayRails::Configuration.wepayable_column.to_sym, ref_id)
 
         redirect_to wepay_gateway.auth_code_url(wepayable_object)
@@ -46,6 +46,10 @@ module WepayRails
       # be a setting in the wepay.yml file.
       def unique_wepay_access_token_key
         :IODDR8856UUFG6788
+      end
+
+      def unique_wepay_auth_token_key
+        :J8876GFUU6588RDDO
       end
 
       # Access token is the OAUTH access token that is used for future
