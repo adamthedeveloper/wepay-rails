@@ -78,7 +78,7 @@ module WepayRails
           :redirect_uri => @wepay_config[:redirect_uri],
           :code => auth_code
         }
-        response = self.class.get("#{@base_uri}/oauth2/token", :query => query)
+        response = self.class.post("#{@base_uri}/oauth2/token", :body => query)
         json = JSON.parse(response.body)
 
         if json.has_key?("error")
@@ -121,7 +121,7 @@ module WepayRails
       # retrieved from the first call.
       def wepay_user
         user_api = lambda {|headers|
-          response = self.class.get("#{@base_uri}/user", {:headers => headers})
+          response = self.class.post("#{@base_uri}/user", {:headers => headers})
           JSON.parse(response.body)
         }
 
@@ -177,7 +177,7 @@ module WepayRails
             :account_id       => @wepay_config[:account_id]
         }.merge(parms)
 
-        response = self.class.get("#{@base_uri}/checkout/create", {:headers => wepay_auth_header}.merge!(:query => defaults))
+        response = self.class.post("#{@base_uri}/checkout/create", {:headers => wepay_auth_header}.merge!(:body => defaults))
         JSON.parse(response.body)
       end
 
@@ -185,16 +185,44 @@ module WepayRails
         checkout_id = args.first
         parms = args.last if args.last.is_a?(Hash)
 
-        response = self.class.get("#{@base_uri}/checkout", {:headers => wepay_auth_header}.merge!(:query => {:checkout_id => checkout_id}))
+        response = self.class.post("#{@base_uri}/checkout", {:headers => wepay_auth_header}.merge!(:body => {:checkout_id => checkout_id}))
         JSON.parse(response.body)
       end
 
+      def create_account(params)
+        response = self.class.post("#{@base_uri}/account/create", {:headers => wepay_auth_header}.merge!(:body => params))
+        JSON.parse(response.body)
+      end
+      
+      def get_account(account_id)
+        response = self.class.post("#{@base_uri}/account", {:headers => wepay_auth_header}.merge!(:body => { account_id: account_id }))
+        JSON.parse(response.body)
+      end
+
+      def find_account(args)
+        response = self.class.post("#{@base_uri}/account/find", {:headers => wepay_auth_header}.merge!(:body => args))
+        JSON.parse(response.body)
+      end
+
+      def modify_account(params)
+        response = self.class.put("#{@base_uri}/account/modify", {:headers => wepay_auth_header}.merge!(:body => args))
+        JSON.parse(response.body)
+      end
+
+      def delete_account(account_id)
+        response = self.class.post("#{@base_uri}/account/delete", {:headers => wepay_auth_header}.merge!(:body => { account_id: account_id }))
+        JSON.parse(response.body)
+      end
+
+      def get_account_balance(account_id)
+        response = self.class.post("#{@base_uri}/account/balance", {:headers => wepay_auth_header}.merge!(:body => { account_id: account_id }))
+        JSON.parse(response.body)
+      end
     end
 
     include WepayRails::Exceptions
     include WepayRails::Helpers::ControllerHelpers
   end
-
 
   def self.included(base)
     base.extend WepayRails::Helpers::ModelHelpers
