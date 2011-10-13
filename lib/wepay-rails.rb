@@ -2,7 +2,6 @@ require 'active_record'
 require 'helpers/model_helpers'
 require 'helpers/controller_helpers'
 module WepayRails
-
   class Configuration
     @@wepayable_class = nil
     @@wepayable_column = nil
