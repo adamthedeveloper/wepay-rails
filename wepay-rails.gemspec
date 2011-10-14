@@ -4,14 +4,14 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{wepay-rails}
-  s.version = "0.1.114.1"
+  s.name = "wepay-rails"
+  s.version = "0.1.115"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = [%q{Adam Medeiros}]
-  s.date = %q{2011-09-06}
-  s.description = %q{Rails gem that interfaces with the WePay API}
-  s.email = %q{adammede@gmail.com}
+  s.authors = ["Adam Medeiros"]
+  s.date = "2011-10-14"
+  s.description = "Rails gem that interfaces with the WePay API"
+  s.email = "adammede@gmail.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
     "README",
@@ -38,11 +38,11 @@ Gem::Specification.new do |s|
     "test/test_wepay-rails.rb",
     "wepay-rails.gemspec"
   ]
-  s.homepage = %q{http://github.com/adamthedeveloper/wepay-rails}
-  s.licenses = [%q{MIT}]
-  s.require_paths = [%q{lib}]
-  s.rubygems_version = %q{1.8.7}
-  s.summary = %q{Rails gem that interfaces with the WePay API}
+  s.homepage = "http://github.com/adamthedeveloper/wepay-rails"
+  s.licenses = ["MIT"]
+  s.require_paths = ["lib"]
+  s.rubygems_version = "1.8.10"
+  s.summary = "Rails gem that interfaces with the WePay API"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
