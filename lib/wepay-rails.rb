@@ -71,13 +71,13 @@ module WepayRails
 
       def access_token(wepayable_object)
         auth_code = wepayable_object.send(WepayRails::Configuration.wepayable_column.to_s)
-        query = {
+        params = {
           :client_id => @wepay_config[:client_id],
           :client_secret => @wepay_config[:client_secret],
           :redirect_uri => @wepay_config[:redirect_uri],
           :code => auth_code
         }
-        response = self.class.post("#{@base_uri}/oauth2/token", :body => query)
+        response = self.class.post("#{@base_uri}/oauth2/token", :body => params)
         json = JSON.parse(response.body)
 
         if json.has_key?("error")
@@ -97,14 +97,12 @@ module WepayRails
       # Get the auth code url that will be used to fetch the auth code for the customer
       # arguments are the redirect_uri and an array of permissions that your application needs
       # ex. ['manage_accounts','collect_payments','view_balance','view_user']
-      def auth_code_url(wepayable_object)
-        parms = {
-          :client_id => @wepay_config[:client_id],
-          :redirect_uri => @wepay_config[:redirect_uri],
-          :scope => WepayRails::Configuration.settings[:scope].join(',')
-        }
+      def auth_code_url(params = {})
+        params[:client_id] ||= @wepay_config[:client_id]
+        params[:redirect_uri] ||= @wepay_config[:redirect_uri]
+        params[:scope] ||= WepayRails::Configuration.settings[:scope].join(',')
 
-        query = parms.map do |k, v|
+        query = params.map do |k, v|
           "#{k.to_s}=#{v}"
         end.join('&')
 
@@ -112,6 +110,9 @@ module WepayRails
       end
 
       def wepay_auth_header
+        unless @wepay_access_token
+          raise WepayRails::Exceptions::AccessTokenError.new("No access token available")
+        end
         {'Authorization' => "Bearer: #{@wepay_access_token}"}
       end
 

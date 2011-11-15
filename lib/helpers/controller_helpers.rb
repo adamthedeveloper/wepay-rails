@@ -2,7 +2,7 @@ module WepayRails
   module Helpers
     module ControllerHelpers
 
-      def redirect_to_wepay_for_auth(wepayable_object)
+      def redirect_to_wepay_for_auth(wepayable_object, params = {})
         # Initially set a reference ID to the column created for the wepayable
         # so that when the redirect back from wepay happens, we can reference
         # the original wepayable, and then save the new auth code into the reference ID's
@@ -11,7 +11,7 @@ module WepayRails
         session[unique_wepay_auth_token_key] = ref_id
         wepayable_object.update_attribute(WepayRails::Configuration.wepayable_column.to_sym, ref_id)
 
-        redirect_to wepay_gateway.auth_code_url(wepayable_object)
+        redirect_to wepay_gateway.auth_code_url(params)
       end
 
       # @deprecated Use wepay_gateway instead of gateway
@@ -37,8 +37,6 @@ module WepayRails
       def initialize_wepay_access_token(wepayable_object)
         session[unique_wepay_access_token_key] = wepay_gateway.access_token(wepayable_object)
         return
-      rescue WepayRails::Exceptions::ExpiredTokenError => e
-        redirect_to_wepay_for_auth(wepayable_object) and return
       end
 
       # Since we are saving the access token in the session,
@@ -59,7 +57,7 @@ module WepayRails
       end
 
       def wepay_access_token_exists?
-        @access_token_exists ||= wepay_access_token.present?
+        wepay_access_token.present?
       end
 
       # Many of the settings you pass in here are already factored in from
@@ -97,9 +95,10 @@ module WepayRails
       # :require_shipping	No	A boolean value (0 or 1). If set to 1 then the payer will be asked to enter a shipping address when they pay. After payment you can retrieve this shipping address by calling /checkout
       # :shipping_fee	No	The amount that you want to charge for shipping.
       # :charge_tax	No	A boolean value (0 or 1). If set to 1 and the account has a relevant tax entry (see /account/set_tax), then tax will be charged.
-      def init_checkout_and_send_user_to_wepay(parms)
-        response = wepay_gateway.perform_checkout(parms)
-        raise WepayRails::Exceptions::InitializeCheckoutError.new("A problem occurred while trying to checkout. Wepay didn't send us back a checkout uri. Response was: #{response.inspect}") unless response && response.has_key?('checkout_uri')
+      def init_checkout_and_send_user_to_wepay(params)
+        response = wepay_gateway.perform_checkout(params)
+        checkout = WepayCheckoutRecord.create(params.merge({ checkout_id: response['checkout_id'] }))
+        raise WepayRails::Exceptions::InitializeCheckoutError.new("A problem occurred while trying to checkout. Wepay didn't send us back a checkout uri. Response was: #{response.inspect}, Params were: #{params}, Token was: #{wepay_access_token}") unless response && response.has_key?('checkout_uri')
         redirect_to response['checkout_uri'] and return
       end
     end
