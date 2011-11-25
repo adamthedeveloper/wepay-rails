@@ -1,0 +1,23 @@
+production:
+  client_id: <your client id from wepay>
+  client_secret: <your client secret from wepay>
+  account_id: <your account id from wepay>
+  auth_code_location: MyModel.wepay_auth_code #model and column where you store the auth code for each of your customers eg. Profile.wepay_auth_code
+  redirect_uri: "http://www.example.com/wepay/authorize" # where to send the user on their trip back from wepay for payment
+  after_authorize_redirect_uri: "http://www.example.com/purchase/checkout" # after the user gets an auth token from wepay, where should they come?
+  scope: [refund_payments,collect_payments,view_balance,view_user]
+  wepay_api_uri: "https://api.wepay.com" # Use https://stage.wepay.com for development
+  wepay_api_version: "v2"
+  ipn_callback_uri: "http://www.example.com/wepay/ipn" # Future requests from wepay to you should go where?
+  fee_payer: Payee
+  checkout_type: GOODS
+  charge_tax: false
+  app_fee: 0
+  auto_capture: true
+  require_shipping: false
+  shipping_fee: 0
+  charge_tax: false
+  wepay_checkout_model: WepayCheckoutRecord # This is where the transactions for the checkouts will be stored
+development:
+
+test:
