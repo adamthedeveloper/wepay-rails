@@ -50,13 +50,11 @@ module WepayRails
             :account_id => @wepay_config[:account_id]
         }.merge(parms)
 
-        response = self.class.post("#{@base_uri}/checkout/create", {:headers => wepay_auth_header}.merge!(:body => defaults))
-        JSON.parse(response.body)
+        self.call("/checkout/create", {:body => defaults})
       end
 
       def lookup_checkout(checkout_id)
-        response = self.class.post("#{@base_uri}/checkout", {:headers => wepay_auth_header}.merge!(:body => {:checkout_id => checkout_id}))
-        JSON.parse(response.body)
+        self.call("/checkout", {:body => {:checkout_id => checkout_id}})
       end
     end
   end

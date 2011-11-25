@@ -1,5 +1,4 @@
 require 'active_record'
-require 'helpers/model_helpers'
 require 'helpers/controller_helpers'
 require 'api/account_methods'
 require 'api/checkout_methods'
@@ -92,31 +91,30 @@ module WepayRails
           :code => auth_code
         }
 
-        response = self.class.post("#{@base_uri}/oauth2/token", :body => params)
-        json = JSON.parse(response.body)
+        response = self.call("/oauth2/token", {:body => params})
 
-        if json.has_key?("error")
-          if json.has_key?("error_description")
-            if ['invalid code parameter','the code has expired'].include?(json['error_description'])
-              raise WepayRails::Exceptions::ExpiredTokenError.new("Token either expired or invalid: #{json["error_description"]}")
+        if response.has_key?("error")
+          if response.has_key?("error_description")
+            if ['invalid code parameter','the code has expired'].include?(response['error_description'])
+              raise WepayRails::Exceptions::ExpiredTokenError.new("Token either expired or invalid: #{response["error_description"]}")
             end
-            raise WepayRails::Exceptions::AccessTokenError.new(json["error_description"])
+            raise WepayRails::Exceptions::AccessTokenError.new(response["error_description"])
           end
         end
 
-        raise WepayRails::Exceptions::AccessTokenError.new("A problem occurred trying to get the access token: #{json.inspect}") unless json.has_key?("access_token")
+        raise WepayRails::Exceptions::AccessTokenError.new("A problem occurred trying to get the access token: #{response.inspect}") unless response.has_key?("access_token")
 
         @wepay_auth_code    = auth_code
-        @wepay_access_token = json["access_token"]
+        @wepay_access_token = response["access_token"]
       end
 
       # Get the auth code url that will be used to fetch the auth code for the customer
       # arguments are the redirect_uri and an array of permissions that your application needs
       # ex. ['manage_accounts','collect_payments','view_balance','view_user']
       def auth_code_url(params = {})
-        params[:client_id] ||= @wepay_config[:client_id]
+        params[:client_id]    ||= @wepay_config[:client_id]
         params[:redirect_uri] ||= @wepay_config[:redirect_uri]
-        params[:scope] ||= WepayRails::Configuration.settings[:scope].join(',')
+        params[:scope]        ||= WepayRails::Configuration.settings[:scope].join(',')
 
         query = params.map do |k, v|
           "#{k.to_s}=#{v}"
@@ -136,12 +134,12 @@ module WepayRails
       # per request. Any subsequent calls to wepay_user will return the data
       # retrieved from the first call.
       def wepay_user
-        user_api = lambda {|headers|
-          response = self.class.post("#{@base_uri}/user", {:headers => headers})
-          JSON.parse(response.body)
-        }
+        @wepay_user ||= self.call("/user")
+      end
 
-        @wepay_user ||= user_api.call(wepay_auth_header)
+      def call(api_path, params={})
+        response = self.class.post("#{@base_uri}#{api_path}", {:headers => wepay_auth_header}.merge!(params))
+        JSON.parse(response.body)
       end
 
       include WepayRails::Api::CheckoutMethods
@@ -152,8 +150,4 @@ module WepayRails
     include WepayRails::Helpers::ControllerHelpers
   end
 
-  def self.included(base)
-    base.extend WepayRails::Helpers::ModelHelpers
-  end
 end
-ActiveRecord::Base.send(:include, WepayRails)
