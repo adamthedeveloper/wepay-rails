@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "wepay-rails"
-  s.version = "0.1.116"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adam Medeiros"]
-  s.date = "2011-11-15"
+  s.date = "2011-11-25"
   s.description = "Rails gem that interfaces with the WePay API"
   s.email = "adammede@gmail.com"
   s.extra_rdoc_files = [
@@ -31,6 +31,10 @@ Gem::Specification.new do |s|
     "app/controllers/wepay/ipn_controller.rb",
     "config/routes.rb",
     "lib/examples/wepay.yml",
+    "lib/generators/wepay_rails/install/install_generator.rb",
+    "lib/generators/wepay_rails/install/templates/create_wepay_checkout_records.rb",
+    "lib/generators/wepay_rails/install/templates/wepay.yml",
+    "lib/generators/wepay_rails/install/templates/wepay_checkout_record.rb",
     "lib/helpers/controller_helpers.rb",
     "lib/helpers/model_helpers.rb",
     "lib/wepay-rails.rb",
