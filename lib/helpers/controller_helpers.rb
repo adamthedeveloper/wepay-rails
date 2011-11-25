@@ -111,8 +111,22 @@ module WepayRails
       def init_checkout_and_send_user_to_wepay(params, wepayable_object=nil)
         initialize_wepay_access_token(wepayable_object) if wepayable_object.present?
         response = wepay_gateway.perform_checkout(params)
-        checkout = WepayCheckoutRecord.create(params.merge({ checkout_id: response['checkout_id'] }))
-        raise WepayRails::Exceptions::InitializeCheckoutError.new("A problem occurred while trying to checkout. Wepay didn't send us back a checkout uri. Response was: #{response.inspect}, Params were: #{params}, Token was: #{wepay_access_token}") unless response && response.has_key?('checkout_uri')
+
+        unless response && response.has_key?('checkout_uri')
+          raise WepayRails::Exceptions::InitializeCheckoutError.new("A problem occurred while trying to checkout.
+          Wepay didn't send us back a checkout uri. Response was: #{response.inspect},
+          Params were: #{params}, Token was: #{wepay_access_token}")
+        end
+
+        wcr_params = {
+            :auth_code    => wepay_gateway.wepay_auth_code,
+            :access_token => wepay_access_token,
+            :checkout_id  => response['checkout_id']
+        }
+
+        params.merge!(wcr_params)
+
+        WepayCheckoutRecord.create(params)
         redirect_to response['checkout_uri'] and return
       end
     end

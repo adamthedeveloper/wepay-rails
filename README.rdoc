@@ -56,11 +56,6 @@ you can create an IpnController in your rails app.
         end
     end
 
-wepay.yml will also need these directives. See the wepay.yml.example file in config.
-
-When you include WepayRails::Payments, you get the controller actions you need. For instance, initialize_wepay_access_token(auth_code)
-which completes the Oauth2 handshake with Wepay and get's the access token for future comunications with Wepay.
-
 Finally, your checkout controller (or some controller that will interact with the Wepay API):
 
     class Purchase::CheckoutController < Purchase::PurchaseController
@@ -94,15 +89,20 @@ Finally, your checkout controller (or some controller that will interact with th
 
 The controller I use for finalizing the checkout - AKA - the controller the user is sent back to after his/her trip to
 wepay to checkout.
-    class Purchase::FinalizeController < ApplicationController
-        def index
-            # Do something - the user has come back from wepay and need an acknowlegement or something.
-            # For example - my app does something like:
 
-            cart = Cart.find_by_transaction_id(params[:txID])
-            # my redirect_uri included a txID so that I can look up the
-            # cart when the customer came back.
-        end
+    class Purchase::FinalizeController < Wepay::ApplicationController
+      def index
+        cart = Cart.find_by_transaction_id(params[:txID])
+        wcr  = WepayCheckoutRecord.find_by_checkout_id(params[:checkout_id])
+
+        checkout = wepay_gateway.lookup_checkout(wcr.checkout_id)
+        wcr.update_attributes(checkout)
+
+        # Convert cart to an order?? Move to observer of WepayCheckoutRecord??
+        cart.convert_cart_to_order if wcr.state == 'authorized'
+
+        render :text => wcr.inspect
+      end
     end
 
 Example Routes for these:
