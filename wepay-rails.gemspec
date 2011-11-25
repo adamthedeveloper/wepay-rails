@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "wepay-rails"
-  s.version = "0.2.1"
+  s.version = "0.2.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adam Medeiros"]
@@ -30,7 +30,8 @@ Gem::Specification.new do |s|
     "app/controllers/wepay/authorize_controller.rb",
     "app/controllers/wepay/ipn_controller.rb",
     "config/routes.rb",
-    "lib/examples/wepay.yml",
+    "lib/api/account_methods.rb",
+    "lib/api/checkout_methods.rb",
     "lib/generators/wepay_rails/install/install_generator.rb",
     "lib/generators/wepay_rails/install/templates/create_wepay_checkout_records.rb",
     "lib/generators/wepay_rails/install/templates/wepay.yml",
