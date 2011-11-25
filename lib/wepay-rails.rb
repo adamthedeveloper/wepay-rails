@@ -70,7 +70,11 @@ module WepayRails
       end
 
       def access_token(wepayable_object)
-        auth_code = wepayable_object.send(WepayRails::Configuration.wepayable_column.to_s)
+        auth_code = if wepayable_object.is_a?(String)
+                      wepayable_object
+                    else
+                      wepayable_object.send(WepayRails::Configuration.wepayable_column.to_s)
+                    end
         params = {
           :client_id => @wepay_config[:client_id],
           :client_secret => @wepay_config[:client_secret],
