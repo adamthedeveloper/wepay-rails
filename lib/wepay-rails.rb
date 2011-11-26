@@ -87,7 +87,7 @@ module WepayRails
         params = {
           :client_id => @wepay_config[:client_id],
           :client_secret => @wepay_config[:client_secret],
-          :redirect_uri => @wepay_config[:redirect_uri],
+          :redirect_uri => (@wepay_config[:redirect_uri].present? ? @wepay_config[:redirect_uri] : "#{@wepay_config[:root_callback_uri]}/wepay/authorize"),
           :code => auth_code
         }
 
@@ -113,7 +113,7 @@ module WepayRails
       # ex. ['manage_accounts','collect_payments','view_balance','view_user']
       def auth_code_url(params = {})
         params[:client_id]    ||= @wepay_config[:client_id]
-        params[:redirect_uri] ||= @wepay_config[:redirect_uri]
+        params[:redirect_uri] ||= (@wepay_config[:redirect_uri].present? ? @wepay_config[:redirect_uri] : "#{@wepay_config[:root_callback_uri]}/wepay/authorize")
         params[:scope]        ||= WepayRails::Configuration.settings[:scope].join(',')
 
         query = params.map do |k, v|

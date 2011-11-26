@@ -11,7 +11,7 @@ add a column to one of your models to hold the authentication token. For example
 
 Your migration:
 
-    add_column :my_model, :wepay_auth_code, :string
+    add_column :users, :wepay_auth_code, :string
 
 You need to also create a new model called WepayCheckoutRecord. It will be updated by wepay's IPN system as changes to the checkout change - such as the status.
 Wepay-rails handles those IPN notifications for you. You can write observers watching the WepayCheckoutRecord model if you need to have
@@ -30,7 +30,7 @@ Modify config/wepay.yml.example to your needs. You will need to set the model an
 Snippet of wepay.yml showing the auth_code_location directive:
 
     production:
-      auth_code_location: MyModel.wepay_auth_code
+      auth_code_location: User.wepay_auth_code
 
 You will have to set up a few new controllers in your rails app to handle callbacks and redirects from wepay.
 I created one called finalize_controller and I use it for a landing page when the customer is finished paying
@@ -44,20 +44,10 @@ For now, here's what I am doing in my rails app to handle it...
                         |_ checkout_controller.rb
                         |_ finalize_controller.rb
 
-The wepay-rails gem comes with an IpnController already built in for
-handling requests from wepay about a specific checkout. If you wish to override it,
-you can create an IpnController in your rails app.
-
-    class IpnController < Wepay::ApplicationController
-        def index
-            #Do something with the instant payment notifications back from Wepay
-        end
-    end
-
 Finally, your checkout controller (or some controller that will interact with the Wepay API):
 
     class Purchase::CheckoutController < Purchase::PurchaseController
-        before_filter :authenticate_account! # I am using devise - this line depends on your authentication scheme
+        before_filter :authenticate_user! # I am using devise - this line depends on your authentication scheme
 
         # PLEASE READ
         # I am saving the wepay_auth_code in my Profile model. Somewhere in my rails app, I have a method called
@@ -70,18 +60,17 @@ Finally, your checkout controller (or some controller that will interact with th
 
         def index
 
-            cart = current_account.cart # EXAMPLE - get my shopping cart
+            cart = current_user.cart # EXAMPLE - get my shopping cart
             tx_id = cart.transaction_id # EXAMPLE - I use a column in my cart to have a way to look up the cart upon the user's return from wepay
 
             checkout_params = {
                 :amount => cart.grand_total,
                 :short_description => cart.short_description,
                 :long_description => cart.long_description,
-                :redirect_uri => purchase_finalize_index_url(:txID => tx_id) # Wepay redirects the user back to this url after purchase
             }
 
             # Finally, send the user off to wepay so you can get paid! - CASH MONEY
-            init_checkout_and_send_user_to_wepay(checkout_params, current_profile)
+            init_checkout_and_send_user_to_wepay(checkout_params, current_user)
         end
     end
 
@@ -90,24 +79,18 @@ wepay to checkout.
 
     class Purchase::FinalizeController < Wepay::ApplicationController
       def index
-        cart = Cart.find_by_transaction_id(params[:txID])
         wcr  = WepayCheckoutRecord.find_by_checkout_id(params[:checkout_id])
 
-        checkout = wepay_gateway.lookup_checkout(wcr.checkout_id)
-        wcr.update_attributes(checkout)
+        # Set the association of the wepay checkout record to my cart - then, on to order.
+        cart = current_account.cart
+        cart.wepay_checkout_record = wcr
+        cart.save!
 
         # Convert cart to an order?? Move to observer of WepayCheckoutRecord??
         cart.convert_cart_to_order if wcr.state == 'authorized'
 
         render :text => wcr.inspect
       end
-    end
-
-Example Routes for these:
-    namespace :purchase do
-        resource :cart, :has_many => :purchase_items
-        resources :checkout, :only => [:index]
-        resources :finalize, :only => [:index]
     end
 
 

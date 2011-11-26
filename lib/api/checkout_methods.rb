@@ -38,8 +38,8 @@ module WepayRails
       # :charge_tax	No	A boolean value (0 or 1). If set to 1 and the account has a relevant tax entry (see /account/set_tax), then tax will be charged.
       def perform_checkout(parms)
         defaults = {
-            :callback_uri => @wepay_config[:ipn_callback_uri],
-            :redirect_uri => @wepay_config[:checkout_redirect_uri],
+            :callback_uri => (@wepay_config[:ipn_callback_uri].present? ? @wepay_config[:ipn_callback_uri] : "#{@wepay_config[:root_callback_uri]}/wepay/ipn"),
+            :redirect_uri => (@wepay_config[:checkout_redirect_uri].present? ? @wepay_config[:checkout_redirect_uri] : "#{@wepay_config[:root_callback_uri]}/wepay/checkout"),
             :fee_payer => @wepay_config[:fee_payer],
             :type => @wepay_config[:checkout_type],
             :charge_tax => @wepay_config[:charge_tax] ? 1 : 0,

@@ -108,8 +108,8 @@ module WepayRails
       # :require_shipping	No	A boolean value (0 or 1). If set to 1 then the payer will be asked to enter a shipping address when they pay. After payment you can retrieve this shipping address by calling /checkout
       # :shipping_fee	No	The amount that you want to charge for shipping.
       # :charge_tax	No	A boolean value (0 or 1). If set to 1 and the account has a relevant tax entry (see /account/set_tax), then tax will be charged.
-      def init_checkout_and_send_user_to_wepay(params, wepayable_object=nil)
-        initialize_wepay_access_token(wepayable_object) if wepayable_object.present?
+      def init_checkout_and_send_user_to_wepay(params, wepayable_object)
+        initialize_wepay_access_token(wepayable_object)
         response = wepay_gateway.perform_checkout(params)
 
         unless response && response.has_key?('checkout_uri')
@@ -118,8 +118,11 @@ module WepayRails
           Params were: #{params}, Token was: #{wepay_access_token}")
         end
 
+        wepayable_column = WepayRails::Configuration.wepayable_column
+        raise unless wepayable_object.send(wepayable_column.to_sym).present?
+
         wcr_params = {
-            :auth_code    => wepay_gateway.wepay_auth_code,
+            :auth_code    => wepayable_object.send(wepayable_column),
             :access_token => wepay_access_token,
             :checkout_id  => response['checkout_id']
         }
