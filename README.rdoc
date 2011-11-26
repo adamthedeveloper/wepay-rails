@@ -44,24 +44,13 @@ For now, here's what I am doing in my rails app to handle it...
                         |_ checkout_controller.rb
                         |_ finalize_controller.rb
 
-Finally, your checkout controller (or some controller that will interact with the Wepay API):
+Finally, your checkout controller (or some controller that will interact with the Wepay API) - notice it extends Wepay::ApplicationController:
 
-    class Purchase::CheckoutController < Purchase::PurchaseController
+    class Purchase::CheckoutController < Wepay::ApplicationController
         before_filter :authenticate_user! # I am using devise - this line depends on your authentication scheme
 
-        # PLEASE READ
-        # I am saving the wepay_auth_code in my Profile model. Somewhere in my rails app, I have a method called
-        # current_profile which I use to return the Profile object of my user. I pass that object through the
-        # init_checkout_and_send_user_to_wepay method along with my checkout parameters.
-
-        # After the customer is sent to wepay, when they are done paying you, they will be redirected
-        # back to your application - you will set the location they will be redirected back to using the redirect_uri directive
-        # either here - or in wepay.yml. Using it here overrides wepay.yml.
-
         def index
-
             cart = current_user.cart # EXAMPLE - get my shopping cart
-            tx_id = cart.transaction_id # EXAMPLE - I use a column in my cart to have a way to look up the cart upon the user's return from wepay
 
             checkout_params = {
                 :amount => cart.grand_total,
@@ -75,7 +64,7 @@ Finally, your checkout controller (or some controller that will interact with th
     end
 
 The controller I use for finalizing the checkout - AKA - the controller the user is sent back to after his/her trip to
-wepay to checkout.
+wepay to checkout. Also, notice it extends Wepay::ApplicationController
 
     class Purchase::FinalizeController < Wepay::ApplicationController
       def index
