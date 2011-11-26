@@ -78,7 +78,7 @@ wepay to checkout. Also, notice it extends Wepay::ApplicationController
         # Convert cart to an order?? Move to observer of WepayCheckoutRecord??
         cart.convert_cart_to_order if wcr.state == 'authorized'
 
-        render :text => wcr.inspect
+        render :text => "Hooray - you bought some widgets!"
       end
     end
 
