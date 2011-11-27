@@ -1,17 +1,19 @@
+require 'digest/sha2'
 class Wepay::AuthorizeController < Wepay::ApplicationController
+
   def index
-    ref_id = session[unique_wepay_auth_token_key]
+    wepay_gateway = WepayRails::Payments::Gateway.new
 
-    if WepayRails::Configuration.settings[:orm] == 'mongoid'
-      wepayable = wepayable_class.where(wepayable_column => ref_id)[0]
+    if params[:code].present?
+      access_token = wepay_gateway.get_access_token(params[:code], redirect_uri)
+      render :text => "Copy this access token, #{access_token} to the access_token directive in your wepay.yml"
     else
-      wepayable = wepayable_class.all(:conditions => ["#{wepayable_column} = ?", ref_id])[0]
+      redirect_to wepay_gateway.auth_code_url redirect_uri
     end
+  end
 
-    wepayable.update_attribute(wepayable_column.to_sym, params[:code])
-    redirect_to session[:after_authorize_redirect_uri] and return if session[:after_authorize_redirect_uri]
-    redirect_to WepayRails::Configuration.settings[:after_authorize_redirect_uri]
-  rescue => e
-    raise AuthorizationError.new("WepayRails was unable to find the record to save the auth code to. : #{e.message}") unless wepayable.present?
+  private
+  def redirect_uri
+    "#{WepayRails::Configuration.settings[:root_callback_uri]}/wepay/authorize"
   end
 end

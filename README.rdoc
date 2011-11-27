@@ -6,13 +6,6 @@ To install it, add this to your Gemfile
 
     gem 'wepay-rails'
 
-Since Wepay uses Oauth2 to authenticate, wepay-rails has been built to handle this for you. You will need to
-add a column to one of your models to hold the authentication token. For example, if you have a user model:
-
-Your migration:
-
-    add_column :users, :wepay_auth_code, :string
-
 You need to also create a new model called WepayCheckoutRecord. It will be updated by wepay's IPN system as changes to the checkout change - such as the status.
 Wepay-rails handles those IPN notifications for you. You can write observers watching the WepayCheckoutRecord model if you need to have
 something specific occur when the checkout changes.
@@ -25,12 +18,23 @@ This will create 3 files for you, a migration file for a table to hold the check
 
     rake db:migrate
 
-Modify config/wepay.yml.example to your needs and copy it to wepay.yml. You will need to set the model and column where you are storing your wepay auth code:
+Modify config/wepay.yml.example to your needs and copy it to config/wepay.yml.
 
-Snippet of wepay.yml showing the auth_code_location directive:
+Assuming that you have:
 
-    production:
-      auth_code_location: User.wepay_auth_code
+1. created an account on wepay
+2. created a user to accept the payments
+3. created your application for your account
+4. set your wepay.yml file with the info it needs to talk to the wepay api minus the access_token
+
+You can now get your access token.
+
+To fetch your access_token, open a browser and go to:
+
+    your.railsapp.com/wepay/authorize
+
+Login at the prompt or register. You will be sent back to your app and you should have gotten an access_token. Copy it to your wepay.yml
+file and restart your app.
 
 You will have to set up a few new controllers in your rails app to handle callbacks and redirects from wepay.
 I created one called finalize_controller and I use it for a landing page when the customer is finished paying
@@ -44,9 +48,16 @@ For now, here's what I am doing in my rails app to handle it...
                         |_ checkout_controller.rb
                         |_ finalize_controller.rb
 
-Finally, your checkout controller (or some controller that will interact with the Wepay API) - notice it extends Wepay::ApplicationController:
+You will need to set the location of these files in your wepay.yml file. The directives are:
 
-    class Purchase::CheckoutController < Wepay::ApplicationController
+    after_authorize_redirect_uri: "http://www.example.com/purchase/checkout"
+    after_checkout_redirect_uri: "http://www.example.com/purchase/finalize"
+
+Finally, your checkout controller (or some controller that will interact with the Wepay API) - notice it includes WepayRails::Payments:
+
+    class Purchase::CheckoutController < ApplicationController
+        include WepayRails::Payments
+
         before_filter :authenticate_user! # I am using devise - this line depends on your authentication scheme
 
         def index
@@ -59,14 +70,14 @@ Finally, your checkout controller (or some controller that will interact with th
             }
 
             # Finally, send the user off to wepay so you can get paid! - CASH MONEY
-            init_checkout_and_send_user_to_wepay(checkout_params, current_user)
+            init_checkout_and_send_user_to_wepay(checkout_params)
         end
     end
 
 The controller I use for finalizing the checkout - AKA - the controller the user is sent back to after his/her trip to
-wepay to checkout. Also, notice it extends Wepay::ApplicationController
+wepay to checkout.
 
-    class Purchase::FinalizeController < Wepay::ApplicationController
+    class Purchase::FinalizeController < ApplicationController
       def index
         wcr  = WepayCheckoutRecord.find_by_checkout_id(params[:checkout_id])
 

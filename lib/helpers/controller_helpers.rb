@@ -2,77 +2,6 @@ module WepayRails
   module Helpers
     module ControllerHelpers
 
-      def redirect_to_wepay_for_auth(wepayable_object, params = {})
-        # Initially set a reference ID to the column created for the wepayable
-        # so that when the redirect back from wepay happens, we can reference
-        # the original wepayable, and then save the new auth code into the reference ID's
-        # place
-        ref_id = Digest::SHA1.hexdigest("#{Time.now.to_i+rand(4)}")
-        session[unique_wepay_auth_token_key] = ref_id
-        wepayable_object.update_attribute(WepayRails::Configuration.wepayable_column.to_sym, ref_id)
-
-        redirect_to wepay_gateway.auth_code_url(params)
-      end
-
-      # @deprecated Use wepay_gateway instead of gateway
-      def gateway
-        warn "[DEPRECATION] Use wepay_gateway instead of gateway"
-        wepay_gateway
-      end
-
-      def wepay_gateway
-        @gateway ||= WepayRails::Payments::Gateway.new(wepay_access_token)
-      end
-
-      # From https://stage.wepay.com/developer/tutorial/authorization
-      # Request
-      # https://stage.wepay.com/v2/oauth2/token
-      # ?client_id=[your client id]
-      # &redirect_uri=[your redirect uri ex. 'http://exampleapp.com/wepay']
-      # &client_secret=[your client secret]
-      # &code=[the code you got in step one]
-      #
-      # Response
-      # {"user_id":"123456","access_token":"1337h4x0rzabcd12345","token_type":"BEARER"} Example
-      def initialize_wepay_access_token(wepayable_object)
-        return if wepay_access_token_exists?
-        begin
-          # check to see if they have an auth code
-          # If not, send them to wepay to get one
-          wepayable_column = WepayRails::Configuration.wepayable_column
-          raise unless wepayable_object.send(wepayable_column.to_sym).present?
-
-          # It's possible that we raise an exception here - probably the auth code
-          # was too old and they need an updated one. Send them to wepay to
-          # get a new one if a raise happens while we run the following line of code.
-          session[unique_wepay_access_token_key] = wepay_gateway.access_token(wepayable_object)
-        rescue
-          redirect_to_wepay_for_auth(wepayable_object)
-        end
-        return
-      end
-
-      # Since we are saving the access token in the session,
-      # ensure key uniqueness. Might be a good idea to have this
-      # be a setting in the wepay.yml file.
-      def unique_wepay_access_token_key
-        :IODDR8856UUFG6788
-      end
-
-      def unique_wepay_auth_token_key
-        :J8876GFUU6588RDDO
-      end
-
-      # Access token is the OAUTH access token that is used for future
-      # comunique
-      def wepay_access_token
-        session[unique_wepay_access_token_key]
-      end
-
-      def wepay_access_token_exists?
-        wepay_access_token.present?
-      end
-
       # Many of the settings you pass in here are already factored in from
       # the wepay.yml file and only need to be overridden if you insist on doing
       # so when this method is called. The following list of key values are pulled
@@ -108,28 +37,16 @@ module WepayRails
       # :require_shipping	No	A boolean value (0 or 1). If set to 1 then the payer will be asked to enter a shipping address when they pay. After payment you can retrieve this shipping address by calling /checkout
       # :shipping_fee	No	The amount that you want to charge for shipping.
       # :charge_tax	No	A boolean value (0 or 1). If set to 1 and the account has a relevant tax entry (see /account/set_tax), then tax will be charged.
-      def init_checkout_and_send_user_to_wepay(params, wepayable_object)
-        initialize_wepay_access_token(wepayable_object)
-        response = wepay_gateway.perform_checkout(params)
-
-        unless response && response.has_key?('checkout_uri')
-          raise WepayRails::Exceptions::InitializeCheckoutError.new("A problem occurred while trying to checkout.
-          Wepay didn't send us back a checkout uri. Response was: #{response.inspect},
-          Params were: #{params}, Token was: #{wepay_access_token}")
-        end
-
-        wepayable_column = WepayRails::Configuration.wepayable_column
-        raise unless wepayable_object.send(wepayable_column.to_sym).present?
-
-        wcr_params = {
-            :auth_code    => wepayable_object.send(wepayable_column),
-            :access_token => wepay_access_token,
+      def init_checkout_and_send_user_to_wepay(params, access_token=nil)
+        wepay_gateway = WepayRails::Payments::Gateway.new(access_token)
+        response      = wepay_gateway.perform_checkout(params)
+        params.merge!({
+            :access_token => wepay_gateway.access_token,
             :checkout_id  => response['checkout_id']
-        }
-
-        params.merge!(wcr_params)
+        })
 
         WepayCheckoutRecord.create(params)
+
         redirect_to response['checkout_uri'] and return
       end
     end

@@ -38,23 +38,33 @@ module WepayRails
       # :charge_tax	No	A boolean value (0 or 1). If set to 1 and the account has a relevant tax entry (see /account/set_tax), then tax will be charged.
       def perform_checkout(parms)
         defaults = {
-            :callback_uri => (@wepay_config[:ipn_callback_uri].present? ? @wepay_config[:ipn_callback_uri] : "#{@wepay_config[:root_callback_uri]}/wepay/ipn"),
-            :redirect_uri => (@wepay_config[:checkout_redirect_uri].present? ? @wepay_config[:checkout_redirect_uri] : "#{@wepay_config[:root_callback_uri]}/wepay/checkout"),
-            :fee_payer => @wepay_config[:fee_payer],
-            :type => @wepay_config[:checkout_type],
-            :charge_tax => @wepay_config[:charge_tax] ? 1 : 0,
-            :app_fee => @wepay_config[:app_fee],
-            :auto_capture => @wepay_config[:auto_capture] ? 1 : 0,
+            :callback_uri     => ipn_callback_uri,
+            :redirect_uri     => checkout_redirect_uri,
+            :fee_payer        => @wepay_config[:fee_payer],
+            :type             => @wepay_config[:checkout_type],
+            :charge_tax       => @wepay_config[:charge_tax] ? 1 : 0,
+            :app_fee          => @wepay_config[:app_fee],
+            :auto_capture     => @wepay_config[:auto_capture] ? 1 : 0,
             :require_shipping => @wepay_config[:require_shipping] ? 1 : 0,
-            :shipping_fee => @wepay_config[:shipping_fee],
-            :account_id => @wepay_config[:account_id]
+            :shipping_fee     => @wepay_config[:shipping_fee],
+            :account_id       => @wepay_config[:account_id]
         }.merge(parms)
 
-        self.call("/checkout/create", {:body => defaults})
+        self.call_api("/checkout/create", defaults)
       end
 
       def lookup_checkout(checkout_id)
-        self.call("/checkout", {:body => {:checkout_id => checkout_id}})
+        self.call_api("/checkout", {:checkout_id => checkout_id})
+      end
+
+      def ipn_callback_uri
+        return @wepay_config[:ipn_callback_uri] if @wepay_config[:ipn_callback_uri].present?
+        "#{@wepay_config[:root_callback_uri]}/wepay/ipn"
+      end
+
+      def checkout_redirect_uri
+        return @wepay_config[:checkout_redirect_uri] if @wepay_config[:checkout_redirect_uri].present?
+        "#{@wepay_config[:root_callback_uri]}/wepay/checkout"
       end
     end
   end

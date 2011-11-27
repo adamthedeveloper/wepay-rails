@@ -4,8 +4,6 @@ class CreateWepayCheckoutRecords < ActiveRecord::Migration
         create_table :wepay_checkout_records do |t|
             t.integer :checkout_id
             t.integer :account_id
-            t.string :auth_code
-            t.string :access_token
             t.string :state
             t.string :short_description
             t.text :long_description

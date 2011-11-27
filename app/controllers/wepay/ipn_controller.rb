@@ -1,10 +1,10 @@
 class Wepay::IpnController < Wepay::ApplicationController
-  def index
+  def create
 
     record = WepayCheckoutRecord.find_by_checkout_id(params[:checkout_id])
 
     if record.present?
-      wepay_gateway.wepay_access_token = record.access_token
+      wepay_gateway = WepayRails::Payments::Gateway.new
       checkout = wepay_gateway.lookup_checkout(record.checkout_id)
       record.update_attributes(checkout)
       render :text => "ok"
