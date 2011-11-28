@@ -2,13 +2,20 @@
 
 Wepay-Rails allows your rails app to accept payments with Wepay (http://www.wepay.com).
 
+= Features
+
+* Built in IPN that listens to push notifications from wepay and updates saved checkout records for you
+* Allows you to fetch your access token easily through a web interface
+* Built in API tools to allow you to make all wepay-api calls easily
+* Built in ability to send your customers to wepay to make payments and handles their trip back for you
+* Saves the current state of every checkout
+* Configurable
+
+= Installation
+
 To install it, add this to your Gemfile
 
     gem 'wepay-rails'
-
-You need to also create a new model called WepayCheckoutRecord. It will be updated by wepay's IPN system as changes to the checkout change - such as the status.
-Wepay-rails handles those IPN notifications for you. You can write observers watching the WepayCheckoutRecord model if you need to have
-something specific occur when the checkout changes.
 
 To create your WepayCheckoutRecord model and migration:
 
@@ -17,6 +24,11 @@ To create your WepayCheckoutRecord model and migration:
 This will create 3 files for you, a migration file for a table to hold the checkout results, the model and a wepay.yml.example file. Next run:
 
     rake db:migrate
+
+WepayCheckoutRecord will be updated by wepay's IPN system as changes to the checkout change - such as the status.
+Wepay-rails handles those IPN notifications for you. You can write observers watching the WepayCheckoutRecord model if you need to have
+something specific occur when the checkout changes. Also, since a model is created for you, you can also track changes to it's state
+through state machine or paper trail or some other gem of your liking. Hook up WepayCheckoutRecord how you like.
 
 Modify config/wepay.yml.example to your needs and copy it to config/wepay.yml.
 
@@ -36,11 +48,12 @@ To fetch your access_token, open a browser and go to:
 Login at the prompt or register. You will be sent back to your app and you should have gotten an access_token. Copy it to your wepay.yml
 file and restart your app.
 
-You will have to set up a few new controllers in your rails app to handle callbacks and redirects from wepay.
-I created one called finalize_controller and I use it for a landing page when the customer is finished paying
+= Example
+
+I created a controller called finalize_controller and I use it for a landing page when the customer is finished paying
 their order. The other controller I created is a checkout_controller - I send my customers to it when they click checkout
-in the cart. Your app is surely differnt than mine. Do what makes sense to you.
-For now, here's what I am doing in my rails app to handle it...
+in the cart. Your app is surely different than mine. Do what makes sense to you.
+For now, here's a small example...
 
   app
     |_ controllers
@@ -48,17 +61,14 @@ For now, here's what I am doing in my rails app to handle it...
                         |_ checkout_controller.rb
                         |_ finalize_controller.rb
 
-You will need to set the location of these files in your wepay.yml file. The directives are:
+Tell wepay-rails where to send the customer after they come back from wepay with a complete payment. Open wepay.yml:
 
-    after_authorize_redirect_uri: "http://www.example.com/purchase/checkout"
     after_checkout_redirect_uri: "http://www.example.com/purchase/finalize"
 
-Finally, your checkout controller (or some controller that will interact with the Wepay API) - notice it includes WepayRails::Payments:
+Create a controller that will send the user to wepay - notice it includes WepayRails::Payments:
 
     class Purchase::CheckoutController < ApplicationController
         include WepayRails::Payments
-
-        before_filter :authenticate_user! # I am using devise - this line depends on your authentication scheme
 
         def index
             cart = current_user.cart # EXAMPLE - get my shopping cart
@@ -74,14 +84,16 @@ Finally, your checkout controller (or some controller that will interact with th
         end
     end
 
-The controller I use for finalizing the checkout - AKA - the controller the user is sent back to after his/her trip to
-wepay to checkout.
+Finally, the controller I use for finalizing the checkout - AKA - the controller the user is sent back to after his/her trip back from
+wepay. A checkout_id is passed in through params so you can access the WepayCheckoutRecord, make a call to
+wepay to get the checkout info - whatever you want to do (See the wiki for more info on API calls):
 
     class Purchase::FinalizeController < ApplicationController
       def index
+        # Fetch the WepayCheckoutRecord that was stored for the checkout
         wcr  = WepayCheckoutRecord.find_by_checkout_id(params[:checkout_id])
 
-        # Set the association of the wepay checkout record to my cart - then, on to order.
+        # Example: Set the association of the wepay checkout record to my cart - then, on to order.
         cart = current_account.cart
         cart.wepay_checkout_record = wcr
         cart.save!

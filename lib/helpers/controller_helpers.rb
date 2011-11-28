@@ -40,6 +40,11 @@ module WepayRails
       def init_checkout_and_send_user_to_wepay(params, access_token=nil)
         wepay_gateway = WepayRails::Payments::Gateway.new(access_token)
         response      = wepay_gateway.perform_checkout(params)
+
+        if response['checkout_uri'].blank?
+          raise WepayRails::Exceptions::WepayCheckoutError.new("An error occurred: #{response.inspect}")
+        end
+
         params.merge!({
             :access_token => wepay_gateway.access_token,
             :checkout_id  => response['checkout_id']

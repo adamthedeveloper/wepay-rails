@@ -4,9 +4,7 @@ production:
   account_id: <your account id from wepay>
   access_token: <your access token that you recieved when you went to http://your.domain.com/wepay/authorize>
   root_callback_uri: "http://www.example.com"
-  after_authorize_redirect_uri: "http://www.example.com/purchase/checkout"
   after_checkout_redirect_uri: "http://www.example.com/purchase/finalize"
-  registration_confirmation_uri: "http://www.example.com/purchase/cart?msg=Please confirm your wepay account."
   scope: [refund_payments,collect_payments,view_balance,view_user]
   wepay_api_uri: "https://api.wepay.com/v2"
   fee_payer: Payee

@@ -1,6 +1,5 @@
 require 'active_record'
 require 'helpers/controller_helpers'
-require 'api/account_methods'
 require 'api/checkout_methods'
 module WepayRails
   class Configuration
@@ -29,6 +28,7 @@ module WepayRails
     class ExpiredTokenError < StandardError; end
     class InitializeCheckoutError < StandardError; end
     class AuthorizationError < StandardError; end
+    class WepayCheckoutError < StandardError; end
   end
 
   module Payments
@@ -98,13 +98,16 @@ module WepayRails
         {'Authorization' => "Bearer: #{@access_token}"}
       end
 
+      def configuration
+        @wepay_config
+      end
+
       def call_api(api_path, params={})
         response = self.class.post("#{@base_uri}#{api_path}", {:headers => wepay_auth_header}.merge!({:body => params}))
         JSON.parse(response.body)
       end
 
       include WepayRails::Api::CheckoutMethods
-      include WepayRails::Api::AccountMethods
     end
 
     include WepayRails::Exceptions
