@@ -1,3 +1,4 @@
+require 'digest/sha2'
 module WepayRails
   module Api
     module CheckoutMethods
@@ -37,9 +38,10 @@ module WepayRails
       # :shipping_fee	No	The amount that you want to charge for shipping.
       # :charge_tax	No	A boolean value (0 or 1). If set to 1 and the account has a relevant tax entry (see /account/set_tax), then tax will be charged.
       def perform_checkout(parms)
+        security_token = Digest::SHA2.hexdigest("#{rand(4)}#{Time.now.to_i}")
         defaults = {
-            :callback_uri     => ipn_callback_uri,
-            :redirect_uri     => checkout_redirect_uri,
+            :callback_uri     => ipn_callback_uri(security_token),
+            :redirect_uri     => checkout_redirect_uri(security_token),
             :fee_payer        => @wepay_config[:fee_payer],
             :type             => @wepay_config[:checkout_type],
             :charge_tax       => @wepay_config[:charge_tax] ? 1 : 0,
@@ -50,21 +52,34 @@ module WepayRails
             :account_id       => @wepay_config[:account_id]
         }.merge(parms)
 
-        self.call_api("/checkout/create", defaults)
+        resp = self.call_api("/checkout/create", defaults).symbolize_keys!
+        resp.merge({:security_token => security_token})
       end
 
       def lookup_checkout(checkout_id)
         self.call_api("/checkout", {:checkout_id => checkout_id})
       end
 
-      def ipn_callback_uri
-        return @wepay_config[:ipn_callback_uri] if @wepay_config[:ipn_callback_uri].present?
-        "#{@wepay_config[:root_callback_uri]}/wepay/ipn"
+      def ipn_callback_uri(security_token)
+        uri = if @wepay_config[:ipn_callback_uri].present?
+                @wepay_config[:ipn_callback_uri]
+              else
+                "#{@wepay_config[:root_callback_uri]}/wepay/ipn"
+              end
+        apply_security_token(uri, security_token)
       end
 
-      def checkout_redirect_uri
-        return @wepay_config[:checkout_redirect_uri] if @wepay_config[:checkout_redirect_uri].present?
-        "#{@wepay_config[:root_callback_uri]}/wepay/checkout"
+      def checkout_redirect_uri(security_token)
+        uri = if @wepay_config[:ipn_callback_uri].present?
+                @wepay_config[:checkout_redirect_uri]
+              else
+                "#{@wepay_config[:root_callback_uri]}/wepay/checkout"
+              end
+        apply_security_token(uri, security_token)
+      end
+
+      def apply_security_token(uri, security_token)
+        uri += (uri =~ /\?/ ? '&' : '?') + "security_token=#{security_token}"
       end
     end
   end

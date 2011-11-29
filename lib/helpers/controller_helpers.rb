@@ -41,18 +41,19 @@ module WepayRails
         wepay_gateway = WepayRails::Payments::Gateway.new(access_token)
         response      = wepay_gateway.perform_checkout(params)
 
-        if response['checkout_uri'].blank?
+        if response[:checkout_uri].blank?
           raise WepayRails::Exceptions::WepayCheckoutError.new("An error occurred: #{response.inspect}")
         end
 
         params.merge!({
-            :access_token => wepay_gateway.access_token,
-            :checkout_id  => response['checkout_id']
+            :access_token   => wepay_gateway.access_token,
+            :checkout_id    => response[:checkout_id],
+            :security_token => response[:security_token]
         })
 
         WepayCheckoutRecord.create(params)
 
-        redirect_to response['checkout_uri'] and return
+        redirect_to response[:checkout_uri] and return
       end
     end
   end
