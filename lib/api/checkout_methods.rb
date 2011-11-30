@@ -57,7 +57,9 @@ module WepayRails
       end
 
       def lookup_checkout(checkout_id)
-        self.call_api("/checkout", {:checkout_id => checkout_id})
+        co = self.call_api("/checkout", {:checkout_id => checkout_id})
+        co.delete("type")
+        co
       end
 
       def ipn_callback_uri(security_token)
