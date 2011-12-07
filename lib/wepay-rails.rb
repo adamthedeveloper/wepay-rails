@@ -1,6 +1,7 @@
 require 'active_record'
 require 'helpers/controller_helpers'
 require 'api/checkout_methods'
+require 'httparty'
 module WepayRails
   class Configuration
     @@settings = nil
