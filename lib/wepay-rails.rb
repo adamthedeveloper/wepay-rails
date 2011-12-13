@@ -19,8 +19,10 @@ module WepayRails
     # Initializers
     initializer "WepayRails.initialize_wepay_rails" do |app|
       yml = Rails.root.join('config', 'wepay.yml').to_s
-      settings = YAML.load_file(yml)[Rails.env].symbolize_keys
-      Configuration.init_conf(settings)
+      if File.exists?(yml)
+        settings = YAML.load_file(yml)[Rails.env].symbolize_keys
+        Configuration.init_conf(settings)
+      end
     end
   end
 
