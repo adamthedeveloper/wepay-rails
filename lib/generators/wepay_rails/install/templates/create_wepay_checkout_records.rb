@@ -26,6 +26,7 @@ class CreateWepayCheckoutRecords < ActiveRecord::Migration
             t.text :shipping_address
             t.decimal :tax
             t.string :security_token
+            t.string :access_token
 
             t.timestamps
         end
