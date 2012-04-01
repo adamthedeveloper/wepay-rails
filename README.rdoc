@@ -108,6 +108,8 @@ wepay to get the checkout info - whatever you want to do (See the wiki for more 
 
 == Special Thanks to additional contributers of Wepay-Rails
 * lucisferre (Chris Nicola) https://github.com/lucisferre
+* mindeavor (Gilbert) https://github.com/mindeavor
+* ustorf (Bernd Ustorf) https://github.com/ustorf
 
 
 == Contributing to wepay-rails
