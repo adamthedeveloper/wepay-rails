@@ -113,6 +113,7 @@ module WepayRails
         JSON.parse(response.body)
       end
 
+      include WepayRails::Api::AccountMethods
       include WepayRails::Api::CheckoutMethods
     end
 
