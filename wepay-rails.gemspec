@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{wepay-rails}
-  s.version = "2.2.7"
+  s.version = "2.2.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adam Medeiros"]
-  s.date = %q{2012-05-25}
+  s.date = %q{2012-05-26}
   s.description = %q{Rails gem that interfaces with the WePay API}
   s.email = %q{adammede@gmail.com}
   s.extra_rdoc_files = [
