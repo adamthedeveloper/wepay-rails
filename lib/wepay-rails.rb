@@ -110,7 +110,7 @@ module WepayRails
 
       def call_api(api_path, params={})
         response = self.class.post("#{@base_uri}#{api_path}", {:headers => wepay_auth_header}.merge!({:body => params}))
-        JSON.parse(response.body)
+        JSON.parse(response.body).symbolize_keys
       end
 
       include WepayRails::Api::AccountMethods

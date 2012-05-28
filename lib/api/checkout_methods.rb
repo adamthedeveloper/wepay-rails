@@ -52,13 +52,13 @@ module WepayRails
             :account_id       => @wepay_config[:account_id]
         }.merge(parms)
 
-        resp = self.call_api("/checkout/create", defaults).symbolize_keys!
+        resp = self.call_api("/checkout/create", defaults)
         resp.merge({:security_token => security_token})
       end
 
       def lookup_checkout(checkout_id)
         co = self.call_api("/checkout", {:checkout_id => checkout_id})
-        co.delete("type")
+        co.delete(:type)
         co
       end
 
