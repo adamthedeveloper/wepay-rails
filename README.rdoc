@@ -7,9 +7,9 @@ Wepay-Rails allows your rails app to accept payments with Wepay (http://www.wepa
 * Built in IPN that listens to push notifications from wepay and updates saved checkout records for you
 * Allows you to fetch your access token easily through a web interface
 * Built in API tools to allow you to make all wepay-api calls easily
-* Built in ability to send your customers to wepay to make payments and handles their trip back for you
+* Built in ability to send your customers to wepay to make payments and handles their trip back for you OR use iFrame for checkouts (see Wiki https://github.com/adamthedeveloper/wepay-rails/wiki/Using-the-wepay-iframe)
 * Saves the current state of every checkout
-* Authorize many users to accept payments dynamically (see Wiki)
+* Authorize many users to accept payments dynamically (see Wiki https://github.com/adamthedeveloper/wepay-rails/wiki/Authorize-Many-Users-Dynamically)
 * Configurable
 
 = Installation
