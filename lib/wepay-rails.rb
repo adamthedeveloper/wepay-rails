@@ -22,8 +22,10 @@ module WepayRails
       yml = Rails.root.join('config', 'wepay.yml').to_s
       if File.exists?(yml)
         settings = YAML.load_file(yml)[Rails.env].symbolize_keys
-        Configuration.init_conf(settings)
+      elsif File.exists?(yml+".erb")
+        settings = YAML::load(ERB.new(IO.read(yml+".erb")).result)[Rails.env].symbolize_keys
       end
+      Configuration.init_conf(settings) unless settings.nil?
     end
   end
 
