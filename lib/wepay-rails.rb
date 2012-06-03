@@ -25,7 +25,7 @@ module WepayRails
       elsif File.exists?(yml+".erb")
         settings = YAML::load(ERB.new(IO.read(yml+".erb")).result)[Rails.env].symbolize_keys
       end
-      Configuration.init_conf(settings) unless settings.nil?
+      Configuration.init_conf(settings)
     end
   end
 
@@ -51,7 +51,7 @@ module WepayRails
       # This also relies heavily on there being a wepay.yml file in your
       # rails config directory - it must look like this:
       def initialize(*args)
-        @wepay_config = WepayRails::Configuration.settings
+        @wepay_config = WepayRails::Configuration.settings || {}
         @access_token = args.first || @wepay_config[:access_token]
         @base_uri     = @wepay_config[:wepay_api_uri] || "https://www.wepay.com/v2"
       end
