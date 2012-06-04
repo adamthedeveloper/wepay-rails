@@ -2,7 +2,7 @@ production:
   client_id: <your client id from wepay>
   client_secret: <your client secret from wepay>
   account_id: <your account id from wepay>
-  access_token: <your access token that you recieved when you went to http://your.domain.com/wepay/authorize>
+  access_token: <your access token that you received when you went to http://your.domain.com/wepay/authorize>
   root_callback_uri: "http://www.example.com"
   after_checkout_redirect_uri: "http://www.example.com/purchase/finalize"
   scope: [refund_payments,collect_payments,view_balance,view_user]
@@ -19,7 +19,7 @@ development:
   client_id: <your client id from wepay>
   client_secret: <your client secret from wepay>
   account_id: <your account id from wepay>
-  access_token: <your access token that you recieved when you went to http://your.domain.com/wepay/authorize>
+  access_token: <your access token that you received when you went to http://your.domain.com/wepay/authorize>
   root_callback_uri: "http://www.example.com"
   after_checkout_redirect_uri: "http://www.example.com/purchase/finalize"
   scope: [refund_payments,collect_payments,view_balance,view_user]
@@ -36,7 +36,7 @@ test:
   client_id: <your client id from wepay>
   client_secret: <your client secret from wepay>
   account_id: <your account id from wepay>
-  access_token: <your access token that you recieved when you went to http://your.domain.com/wepay/authorize>
+  access_token: <your access token that you received when you went to http://your.domain.com/wepay/authorize>
   root_callback_uri: "http://www.example.com"
   after_checkout_redirect_uri: "http://www.example.com/purchase/finalize"
   scope: [refund_payments,collect_payments,view_balance,view_user]
