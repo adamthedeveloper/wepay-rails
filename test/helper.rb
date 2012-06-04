@@ -20,14 +20,16 @@ module WepayRails
     include Thor::Actions
     source_root File.expand_path(File.dirname(__FILE__))
 
-    def create_wepay_config_file(erb=false)
-      copy_file "../lib/generators/wepay_rails/install/templates/wepay.yml", "../config/wepay.yml#{'.erb' if erb}", verbose: false
-      gsub_file "../config/wepay.yml.erb", "<your access token that you received when you went to http://your.domain.com/wepay/authorize>", "<%= 'abc' * 3 %>", verbose: false if erb
-    end
+    no_tasks do
+      def create_wepay_config_file(erb=false)
+        copy_file "../lib/generators/wepay_rails/install/templates/wepay.yml", "../config/wepay.yml#{'.erb' if erb}", verbose: false
+        gsub_file "../config/wepay.yml.erb", "<your access token that you received when you went to http://your.domain.com/wepay/authorize>", "<%= 'abc' * 3 %>", verbose: false if erb
+      end
 
-    def delete_wepay_config_file
-      remove_file "../config/wepay.yml", verbose: false
-      remove_file "../config/wepay.yml.erb", verbose: false
+      def delete_wepay_config_file
+        remove_file "../config/wepay.yml", verbose: false
+        remove_file "../config/wepay.yml.erb", verbose: false
+      end
     end
   end
 end
