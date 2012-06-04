@@ -9,6 +9,7 @@ gem 'httparty'
 group :development do
   gem "rails", "3.1.0"
   gem 'turn', '0.8.2', :require => false
+  gem 'thor'
   gem "bundler", "~> 1.0.0"
   gem "jeweler", "~> 1.6.4"
   gem "rcov", ">= 0"

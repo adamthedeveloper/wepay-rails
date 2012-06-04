@@ -103,4 +103,5 @@ DEPENDENCIES
   jeweler (~> 1.6.4)
   rails (= 3.1.0)
   rcov
+  thor
   turn (= 0.8.2)
