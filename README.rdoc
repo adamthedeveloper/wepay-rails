@@ -2,6 +2,8 @@
 
 Wepay-Rails allows your rails app to accept payments with Wepay (http://www.wepay.com).
 
+{<img src="https://secure.travis-ci.org/adamthedeveloper/wepay-rails.png?branch=master" alt="Build Status" />}[http://travis-ci.org/adamthedeveloper/wepay-rails]
+
 = Features
 
 * Built in IPN that listens to push notifications from wepay and updates saved checkout records for you
