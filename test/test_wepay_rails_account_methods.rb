@@ -5,11 +5,11 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
     create_wepay_config_file(false, true)
     initialize_wepay_config
     @gateway = WepayRails::Payments::Gateway.new(TEST_ACCESS_TOKEN)
-    @accounts = []
   end
 
   def teardown
-    @accounts.each {|account| @gateway.delete_account(account)} # delete test accounts that were created
+    # delete any test accounts that were created
+    @gateway.find_account.each {|acct| @gateway.delete_account(acct[:account_id]) if acct.kind_of?(Hash) && acct[:account_id].present?}
     delete_wepay_config_file
   end
 
@@ -32,8 +32,6 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
 
     assert_not_nil @response[:account_id]
     assert_not_nil @response[:account_uri]
-
-    @accounts << @response[:account_id] # add account for later deletion
   end
 
   test "should get WePay account" do
@@ -46,8 +44,6 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
     assert_not_nil @response[:name]
     assert_equal "Example Account", @response[:name]
     assert_equal "This is just an example WePay account.", @response[:description]
-
-    @accounts << @account # add account for later deletion
   end
 
   test "should find WePay account by reference id or name" do
@@ -61,30 +57,20 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
     assert @response.kind_of?(Array), "<Array> expected but was <#{@response.class}>"
     assert_equal 1, @response.length
     assert_equal "Example Account", @response.first[:name]
-
-    @accounts << @account # add account for later deletion
   end
 
   test "should find all WePay accounts for current authorized user" do
-    # This test is a bit weird.  First we assert that the API call works and
-    # returns an Array, which also gives us the current amount of accounts.
-    # Then we create some test accounts, simultaneously adding their account_id
-    # to the @accounts hash for later deletion, and assert that the new account
-    # was indeed added to the user's list of accounts
-
     @response = @gateway.find_account
     assert @response.kind_of?(Array), "<Array> expected but was <#{@response.class}>"
 
     @count = @response.length
-    3.times do
-      @accounts << @gateway.create_account({
-           :name => "Example Account",
-           :description => "This is just an example WePay account."
-       })[:account_id]
-    end
+    @gateway.create_account({
+         :name => "Example Account",
+         :description => "This is just an example WePay account."
+     })
     @response = @gateway.find_account
 
-    assert_equal @count + 3, @response.length
+    assert_equal @count + 1, @response.length
     assert_equal "Example Account", @response.first[:name]
   end
 
@@ -114,8 +100,6 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
     assert_not_nil @response[:available_balance]
     assert_not_nil @response[:currency]
     assert_equal 0, @response[:available_balance]
-
-    @accounts << @account # add account for later deletion
   end
 
   test "should delete WePay account" do
@@ -127,7 +111,5 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
 
     assert_not_nil @response[:account_id]
     assert_equal @account, @response[:account_id]
-
-    @accounts << @account # add account for later deletion
   end
 end
