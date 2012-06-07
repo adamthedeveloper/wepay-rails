@@ -47,11 +47,11 @@ module WepayRails
       attr_accessor :account_id
 
       # Pass in the wepay access token that we got after the oauth handshake
-      # and use it for ongoing comunique with Wepay.
+      # and use it for ongoing communique with Wepay.
       # This also relies heavily on there being a wepay.yml file in your
       # rails config directory - it must look like this:
       def initialize(*args)
-        @wepay_config = WepayRails::Configuration.settings || {}
+        @wepay_config = WepayRails::Configuration.settings || {:scope => []}
         @access_token = args.first || @wepay_config[:access_token]
         @account_id   = args.first || @wepay_config[:account_id]
         @base_uri     = @wepay_config[:wepay_api_uri] || "https://www.wepay.com/v2"
@@ -92,10 +92,7 @@ module WepayRails
         params[:client_id]    ||= @wepay_config[:client_id]
         params[:scope]        ||= @wepay_config[:scope].join(',')
         params[:redirect_uri]   = redirect_uri
-
-        query = params.map do |k, v|
-          "#{k.to_s}=#{v}"
-        end.join('&')
+        query = params.map { |k, v| "#{k.to_s}=#{v}" }.join('&')
 
         "#{@base_uri}/oauth2/authorize?#{query}"
       end
@@ -113,7 +110,13 @@ module WepayRails
 
       def call_api(api_path, params={})
         response = self.class.post("#{@base_uri}#{api_path}", {:headers => wepay_auth_header}.merge!({:body => params}))
-        JSON.parse(response.body).symbolize_keys
+        json = JSON.parse(response.body)
+        if json.kind_of? Hash
+          json.symbolize_keys!
+        elsif json.kind_of? Array
+          json.each{|h| h.symbolize_keys!}
+        end
+        return json
       end
 
       include WepayRails::Api::AccountMethods

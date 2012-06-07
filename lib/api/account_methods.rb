@@ -9,12 +9,12 @@ module WepayRails
         self.call_api("/account", {:account_id => account_id})
       end
 
-      def find_account(args)
-        self.call_api("/account/find", args)
+      def find_account(params={})
+        self.call_api("/account/find", params)
       end
 
-      def modify_account(args)
-        self.call_api("/account/modify", args)
+      def modify_account(account_id, params={})
+        self.call_api("/account/modify", params.merge({:account_id => account_id}))
       end
 
       def delete_account(account_id)
