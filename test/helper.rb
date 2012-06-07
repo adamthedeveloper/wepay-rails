@@ -22,7 +22,7 @@ module WepayRails
 
     no_tasks do
       def create_wepay_config_file(erb=false, defaults=false)
-        copy_file "../lib/generators/wepay_rails/install/templates/wepay.yml", "../config/wepay.yml#{'.erb' if erb}", verbose: false
+        copy_file "../lib/generators/wepay_rails/install/templates/wepay.yml", "../config/wepay.yml#{'.erb' if erb}", verbose: false, force: true
         gsub_file "../config/wepay.yml.erb", "<your access token that you received when you went to http://your.domain.com/wepay/authorize>", "<%= 'abc' * 3 %>", verbose: false if erb
         add_config_defaults(erb) if defaults
       end
