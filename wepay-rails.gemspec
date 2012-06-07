@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{wepay-rails}
-  s.version = "2.3.0"
+  s.version = "2.3.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adam Medeiros"]
-  s.date = %q{2012-06-03}
+  s.date = %q{2012-06-07}
   s.description = %q{Rails gem that interfaces with the WePay API}
   s.email = %q{adammede@gmail.com}
   s.extra_rdoc_files = [
@@ -40,6 +40,8 @@ Gem::Specification.new do |s|
     "lib/helpers/controller_helpers.rb",
     "lib/wepay-rails.rb",
     "test/helper.rb",
+    "test/test_wepay_rails_account_methods.rb",
+    "test/test_wepay_rails_authorize.rb",
     "test/test_wepay_rails_initialize.rb",
     "wepay-rails.gemspec"
   ]
