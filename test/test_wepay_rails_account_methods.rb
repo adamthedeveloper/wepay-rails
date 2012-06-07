@@ -64,7 +64,7 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
 
     @accounts << @account # add account for later deletion
   end
-
+=begin
   test "should find all WePay accounts for current authorized user" do
     # This test is a bit weird.  First we assert that the API call works and
     # returns an Array, which also gives us the current amount of accounts.
@@ -87,7 +87,7 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
     assert_equal @count + 3, @response.length
     assert_equal "Example Account", @response.first[:name]
   end
-
+=end
   test "should modify WePay account" do
     @account = @gateway.create_account({
        :name => "Example Account",
