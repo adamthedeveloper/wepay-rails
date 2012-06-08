@@ -54,7 +54,8 @@ module WepayRails
         @wepay_config = WepayRails::Configuration.settings || {:scope => []}
         @access_token = args.first || @wepay_config[:access_token]
         @account_id   = args.first || @wepay_config[:account_id]
-        @base_uri     = @wepay_config[:wepay_api_uri] || "https://wepayapi.com/v2"
+        @ui_endpoint  = @wepay_config[:wepay_ui_endpoint] || "https://www.wepay.com/v2"
+        @api_endpoint = @wepay_config[:wepay_api_endpoint] || "https://wepayapi.com/v2"
       end
 
       # Fetch the access token from wepay for the auth code
@@ -67,7 +68,7 @@ module WepayRails
           :code          => auth_code
         }
 
-        response = self.class.post("#{@base_uri}/oauth2/token", {:body => params})
+        response = self.class.post("#{@api_endpoint}/oauth2/token", {:body => params})
         json = JSON.parse(response.body)
 
         if json.has_key?("error")
@@ -94,7 +95,7 @@ module WepayRails
         params[:redirect_uri]   = redirect_uri
         query = params.map { |k, v| "#{k.to_s}=#{v}" }.join('&')
 
-        "#{@base_uri}/oauth2/authorize?#{query}"
+        "#{@ui_endpoint}/oauth2/authorize?#{query}"
       end
 
       def wepay_auth_header
@@ -109,7 +110,7 @@ module WepayRails
       end
 
       def call_api(api_path, params={})
-        response = self.class.post("#{@base_uri}#{api_path}", {:headers => wepay_auth_header}.merge!({:body => params}))
+        response = self.class.post("#{@api_endpoint}#{api_path}", {:headers => wepay_auth_header}.merge!({:body => params}))
         json = JSON.parse(response.body)
         if json.kind_of? Hash
           json.symbolize_keys!
