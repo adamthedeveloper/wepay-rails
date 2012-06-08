@@ -1,6 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/helper')
 
 class TestWepayRailsAccountMethods < ActiveSupport::TestCase
+  # ToDo: Remove actual API calls in favor of stubs
+
   def setup
     create_wepay_config_file(false, true)
     initialize_wepay_config
@@ -47,11 +49,13 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
   end
 
   test "should find WePay account by reference id or name" do
+    sleep rand(4) # force Ruby to wait to avoid latency issues
     @account = @gateway.create_account({
        :name => "Example Account",
        :description => "This is just an example WePay account.",
        :reference_id => "wepayrailstestaccount12345"
     })[:account_id]
+    sleep rand(4)
     @response = @gateway.find_account(:reference_id => "wepayrailstestaccount12345")
 
     assert @response.kind_of?(Array), "<Array> expected but was <#{@response.class}>"
@@ -60,14 +64,20 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
   end
 
   test "should find all WePay accounts for current authorized user" do
+    # force Ruby to wait using sleep to avoid latency issues
+    # using rand helps avoid simultaneous connections, but not perfectly
+
+    sleep rand(4)
     @response = @gateway.find_account
     assert @response.kind_of?(Array), "<Array> expected but was <#{@response.class}>"
 
     @count = @response.length
+    sleep rand(4)
     @gateway.create_account({
          :name => "Example Account",
          :description => "This is just an example WePay account."
      })
+    sleep 2 + rand(4)
     @response = @gateway.find_account
 
     assert_equal @count + 1, @response.length

@@ -13,7 +13,7 @@ class TestWepayRailsAuthorize < ActiveSupport::TestCase
 
   test "WePay gateway should have correct authorize url" do
     @url = @gateway.auth_code_url("http://www.example.com")
-    assert @url.match("https://stage.wepay.com/v2/oauth2/authorize"), "<https://stage.wepay.com/v2/oauth2/authorize> expected but was #{@url}"
+    assert @url.match("https://stage.wepayapi.com/v2/oauth2/authorize"), "<https://stage.wepayapi.com/v2/oauth2/authorize> expected but was #{@url}"
   end
 
   test "should raise errors when authorizing an invalid auth code" do

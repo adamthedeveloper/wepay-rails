@@ -54,7 +54,7 @@ module WepayRails
         @wepay_config = WepayRails::Configuration.settings || {:scope => []}
         @access_token = args.first || @wepay_config[:access_token]
         @account_id   = args.first || @wepay_config[:account_id]
-        @base_uri     = @wepay_config[:wepay_api_uri] || "https://www.wepay.com/v2"
+        @base_uri     = @wepay_config[:wepay_api_uri] || "https://wepayapi.com/v2"
       end
 
       # Fetch the access token from wepay for the auth code
