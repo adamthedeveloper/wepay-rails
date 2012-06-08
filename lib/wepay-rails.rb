@@ -41,7 +41,7 @@ module WepayRails
     class Gateway
       include HTTParty
 
-      base_uri @base_uri
+      base_uri @ui_endpoint
 
       attr_accessor :access_token
       attr_accessor :account_id
