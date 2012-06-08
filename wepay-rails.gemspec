@@ -4,14 +4,14 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{wepay-rails}
-  s.version = "2.3.1"
+  s.name = "wepay-rails"
+  s.version = "2.3.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adam Medeiros"]
-  s.date = %q{2012-06-07}
-  s.description = %q{Rails gem that interfaces with the WePay API}
-  s.email = %q{adammede@gmail.com}
+  s.date = "2012-06-08"
+  s.description = "Rails gem that interfaces with the WePay API"
+  s.email = "adammede@gmail.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
     "README",
@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".document",
+    ".travis.yml",
     "Gemfile",
     "Gemfile.lock",
     "LICENSE.txt",
@@ -30,6 +31,7 @@ Gem::Specification.new do |s|
     "app/controllers/wepay/authorize_controller.rb",
     "app/controllers/wepay/checkout_controller.rb",
     "app/controllers/wepay/ipn_controller.rb",
+    "build",
     "config/routes.rb",
     "lib/api/account_methods.rb",
     "lib/api/checkout_methods.rb",
@@ -45,11 +47,11 @@ Gem::Specification.new do |s|
     "test/test_wepay_rails_initialize.rb",
     "wepay-rails.gemspec"
   ]
-  s.homepage = %q{http://github.com/adamthedeveloper/wepay-rails}
+  s.homepage = "http://github.com/adamthedeveloper/wepay-rails"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.5.0}
-  s.summary = %q{Rails gem that interfaces with the WePay API}
+  s.rubygems_version = "1.8.24"
+  s.summary = "Rails gem that interfaces with the WePay API"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
