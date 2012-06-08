@@ -102,7 +102,7 @@ module WepayRails
         unless @access_token
           raise WepayRails::Exceptions::AccessTokenError.new("No access token available")
         end
-        {'Authorization' => "Bearer: #{@access_token}"}
+        {'Authorization' => "Bearer: #{@access_token}", 'User-Agent' => "WepayRails"}
       end
 
       def configuration
