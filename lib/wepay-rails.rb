@@ -68,7 +68,7 @@ module WepayRails
           :code          => auth_code
         }
 
-        response = self.class.post("#{@api_endpoint}/oauth2/token", {:body => params})
+        response = self.class.post("#{@api_endpoint}/oauth2/token", {:headers => {'User-Agent' => "WepayRails"}, :body => params})
         json = JSON.parse(response.body)
 
         if json.has_key?("error")
