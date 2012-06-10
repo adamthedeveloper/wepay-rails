@@ -6,28 +6,24 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
   def setup
     create_wepay_config_file(false, true)
     initialize_wepay_config
-    @gateway = WepayRails::Payments::Gateway.new(TEST_ACCESS_TOKEN)
   end
 
   def teardown
-    # delete any test accounts that were created
-    @gateway.find_account.each {|acct| @gateway.delete_account(acct[:account_id]) if acct.kind_of?(Hash) && acct[:account_id].present?}
     delete_wepay_config_file
   end
 
-  test "should return errors from WePay when using invalid access token" do
-    @gateway = WepayRails::Payments::Gateway.new("notAnAccessToken")
-    @response = @gateway.create_account({
-        :name => "Example Account",
-        :description => "This is just an example WePay account."
-    })
-
-    assert_not_nil @response[:error]
-    assert_nil @response[:account_id]
+  test "should raise error from WePay when using invalid access token" do
+    assert_raise WepayRails::Exceptions::ExpiredTokenError do
+      wepay_gateway = WepayRails::Payments::Gateway.new("notAnAccessToken")
+      wepay_gateway.create_account({
+          :name => "Example Account",
+          :description => "This is just an example WePay account."
+      })
+    end
   end
 
   test "should create new WePay account" do
-    @response = @gateway.create_account({
+    @response = wepay_gateway.create_account({
         :name => "Example Account",
         :description => "This is just an example WePay account."
     })
@@ -37,11 +33,11 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
   end
 
   test "should get WePay account" do
-    @account = @gateway.create_account({
+    @account = wepay_gateway.create_account({
        :name => "Example Account",
        :description => "This is just an example WePay account."
     })[:account_id]
-    @response = @gateway.get_account(@account)
+    @response = wepay_gateway.get_account(@account)
 
     assert_not_nil @response[:name]
     assert_equal "Example Account", @response[:name]
@@ -50,13 +46,14 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
 
   test "should find WePay account by reference id or name" do
     sleep rand(4) # force Ruby to wait to avoid latency issues
-    @account = @gateway.create_account({
+    @account = wepay_gateway.create_account({
        :name => "Example Account",
        :description => "This is just an example WePay account.",
-       :reference_id => "wepayrailstestaccount12345"
+       :reference_id => "wepayrailstestaccount123"
     })[:account_id]
     sleep rand(4)
-    @response = @gateway.find_account(:reference_id => "wepayrailstestaccount12345")
+    @response = wepay_gateway.find_account(:reference_id => "wepayrailstestaccount123")
+    sleep rand(4) and wepay_gateway.delete_account(@response.first[:account_id]) # delete account before asserts to be sure
 
     assert @response.kind_of?(Array), "<Array> expected but was <#{@response.class}>"
     assert_equal 1, @response.length
@@ -64,34 +61,32 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
   end
 
   test "should find all WePay accounts for current authorized user" do
-    skip "Remove this test and use stub API calls"
-
     # force Ruby to wait using sleep to avoid latency issues;
     # using rand helps avoid simultaneous connections, but not perfectly
 
     sleep rand(4)
-    @response = @gateway.find_account
+    @response = wepay_gateway.find_account
     assert @response.kind_of?(Array), "<Array> expected but was <#{@response.class}>"
 
     @count = @response.length
     sleep rand(4)
-    @gateway.create_account({
+    wepay_gateway.create_account({
          :name => "Example Account",
          :description => "This is just an example WePay account."
      })
     sleep 2 + rand(4)
-    @response = @gateway.find_account
+    @response = wepay_gateway.find_account
 
     assert_equal @count + 1, @response.length
-    assert_equal "Example Account", @response.first[:name]
+    assert_equal "Example Account", @response.last[:name]
   end
 
   test "should modify WePay account" do
-    @account = @gateway.create_account({
+    @account = wepay_gateway.create_account({
        :name => "Example Account",
        :description => "This is just an example WePay account."
     })[:account_id]
-    @response = @gateway.modify_account(@account, {
+    @response = wepay_gateway.modify_account(@account, {
         :name => "This is a new Name!",
         :description => "This is a new description!"
     })
@@ -102,11 +97,11 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
   end
 
   test "should get current balance of WePay account" do
-    @account = @gateway.create_account({
+    @account = wepay_gateway.create_account({
        :name => "Example Account",
        :description => "This is just an example WePay account."
     })[:account_id]
-    @response = @gateway.get_account_balance(@account)
+    @response = wepay_gateway.get_account_balance(@account)
 
     assert_not_nil @response[:pending_balance]
     assert_not_nil @response[:available_balance]
@@ -115,11 +110,11 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
   end
 
   test "should delete WePay account" do
-    @account = @gateway.create_account({
+    @account = wepay_gateway.create_account({
        :name => "Example Account",
        :description => "This is just an example WePay account."
     })[:account_id]
-    @response = @gateway.delete_account(@account)
+    @response = wepay_gateway.delete_account(@account)
 
     assert_not_nil @response[:account_id]
     assert_equal @account, @response[:account_id]
