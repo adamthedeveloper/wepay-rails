@@ -35,6 +35,7 @@ module WepayRails
     class InitializeCheckoutError < StandardError; end
     class AuthorizationError < StandardError; end
     class WepayCheckoutError < StandardError; end
+    class WepayApiError < StandardError; end
   end
 
   module Payments
@@ -60,7 +61,6 @@ module WepayRails
 
       # Fetch the access token from wepay for the auth code
       def get_access_token(auth_code, redirect_uri)
-
         params = {
           :client_id     => @wepay_config[:client_id],
           :client_secret => @wepay_config[:client_secret],
@@ -71,19 +71,11 @@ module WepayRails
         response = self.class.post("#{@api_endpoint}/oauth2/token", {:headers => {'User-Agent' => "WepayRails"}, :body => params})
         json = JSON.parse(response.body)
 
-        if json.has_key?("error")
-          if json.has_key?("error_description")
-            if ['invalid code parameter','the code has expired','this access_token has been revoked'].include?(json['error_description'])
-              raise WepayRails::Exceptions::ExpiredTokenError.new("Token either expired, revoked or invalid: #{json["error_description"]}")
-            end
-            raise WepayRails::Exceptions::AccessTokenError.new(json["error_description"])
-          end
-        end
-
+        json.symbolize_keys! and raise_if_response_error(json)
         raise WepayRails::Exceptions::AccessTokenError.new("A problem occurred trying to get the access token: #{json.inspect}") unless json.has_key?("access_token")
 
-        @account_id   = json["user_id"]
-        @access_token = json["access_token"]
+        @account_id   = json[:user_id]
+        @access_token = json[:access_token]
       end
 
       # Get the auth code url that will be used to fetch the auth code for the customer
@@ -109,15 +101,25 @@ module WepayRails
         @wepay_config
       end
 
+      def raise_if_response_error(json)
+        if json.has_key?(:error) && json.has_key?(:error_description)
+          if ['invalid code parameter','the code has expired','this access_token has been revoked', 'a valid access_token is required'].include?(json[:error_description])
+            raise WepayRails::Exceptions::ExpiredTokenError.new("Token either expired, revoked or invalid: #{json[:error_description]}")
+          end
+          raise WepayRails::Exceptions::WepayApiError.new(json[:error_description])
+        end
+      end
+
       def call_api(api_path, params={})
         response = self.class.post("#{@api_endpoint}#{api_path}", {:headers => wepay_auth_header}.merge!({:body => params}))
         json = JSON.parse(response.body)
         if json.kind_of? Hash
-          json.symbolize_keys!
+          json.symbolize_keys! and raise_if_response_error(json)
         elsif json.kind_of? Array
           json.each{|h| h.symbolize_keys!}
         end
-        return json
+
+        json
       end
 
       include WepayRails::Api::AccountMethods
