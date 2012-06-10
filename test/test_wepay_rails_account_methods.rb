@@ -61,6 +61,8 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
   end
 
   test "should find all WePay accounts for current authorized user" do
+    skip "Rewrite this test using stubbed API calls"
+
     # force Ruby to wait using sleep to avoid latency issues;
     # using rand helps avoid simultaneous connections, but not perfectly
 
