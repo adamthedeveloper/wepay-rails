@@ -41,7 +41,11 @@ module WepayRails
 end
 
 class ActiveSupport::TestCase
-  TEST_ACCESS_TOKEN = "cce28dc50618c135005cc588fe3a8b8cdb35acc92a54209d6a0f4408e61be801"
+  TEST_ACCESS_TOKEN = "73a4de03b0e4636dd204e2de03c3d8c377e45f666595af29b8a7b5d353350541"
+
+  def wepay_gateway(token=TEST_ACCESS_TOKEN)
+    @wepay_gateway ||= WepayRails::Payments::Gateway.new(token)
+  end
 
   def helper
     @helper ||= WepayRails::TestsHelper.new
