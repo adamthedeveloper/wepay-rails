@@ -17,7 +17,7 @@ class TestWepayRailsAuthorize < ActiveSupport::TestCase
   end
 
   test "should raise errors when authorizing an invalid auth code" do
-    assert_raise WepayRails::Exceptions::ExpiredTokenError do
+    assert_raise WepayRails::Exceptions::AccessTokenError do
       @gateway.get_access_token("authCode", "http://www.example.com")
     end
   end

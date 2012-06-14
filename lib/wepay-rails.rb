@@ -71,8 +71,8 @@ module WepayRails
         response = self.class.post("#{@api_endpoint}/oauth2/token", {:headers => {'User-Agent' => "WepayRails"}, :body => params})
         json = JSON.parse(response.body)
 
-        json.symbolize_keys! and raise_if_response_error(json)
         raise WepayRails::Exceptions::AccessTokenError.new("A problem occurred trying to get the access token: #{json.inspect}") unless json.has_key?("access_token")
+        json.symbolize_keys! and raise_if_response_error(json)
 
         @account_id   = json[:user_id]
         @access_token = json[:access_token]
