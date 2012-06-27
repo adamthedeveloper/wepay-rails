@@ -102,7 +102,7 @@ module WepayRails
         unless @access_token
           raise WepayRails::Exceptions::AccessTokenError.new("No access token available")
         end
-        {'Authorization' => "Bearer: #{@access_token}", 'User-Agent' => "WepayRails", 'Content-Type' => "application/json"}
+        {'Authorization' => "Bearer: #{@access_token}", 'User-Agent' => "WepayRails"}
       end
 
       def configuration
@@ -110,7 +110,7 @@ module WepayRails
       end
 
       def call_api(api_path, params={})
-        response = self.class.post("#{@api_endpoint}#{api_path}", {:headers => wepay_auth_header}.merge!({:body => params.to_json}))
+        response = self.class.post("#{@api_endpoint}#{api_path}", {:headers => wepay_auth_header}.merge!({:body => params}))
         json = JSON.parse(response.body)
         if json.kind_of? Hash
           json.symbolize_keys!
