@@ -51,6 +51,8 @@ module WepayRails
             :security_token => response[:security_token],
             :checkout_uri   => response[:checkout_uri]
         })
+        
+        params.delete_if {|k,v| !WepayCheckoutRecord.attribute_names.include? k.to_s}
 
         WepayCheckoutRecord.create(params)
       end
