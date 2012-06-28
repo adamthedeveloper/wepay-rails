@@ -14,6 +14,10 @@ module WepayRails
         end
         @prev_migration_nr.to_s
       end
+      
+      def setup_routes
+        route "WepayRails.routes(self)"
+      end
 
       def copy_migrations
         migration_template "create_wepay_checkout_records.rb", "db/migrate/create_wepay_checkout_records.rb"

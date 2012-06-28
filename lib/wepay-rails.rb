@@ -28,6 +28,18 @@ module WepayRails
       Configuration.init_conf(settings)
     end
   end
+  
+  class << self
+    def routes(rails_router)
+      rails_router.instance_exec do
+        namespace :wepay do
+          resources :ipn
+          resources :authorize
+          resources :checkout
+        end
+      end
+    end
+  end
 
   module Exceptions
     class AccessTokenError < StandardError; end
