@@ -32,7 +32,6 @@ Gem::Specification.new do |s|
     "app/controllers/wepay/checkout_controller.rb",
     "app/controllers/wepay/ipn_controller.rb",
     "build",
-    "config/routes.rb",
     "lib/api/account_methods.rb",
     "lib/api/checkout_methods.rb",
     "lib/generators/wepay_rails/install/install_generator.rb",
