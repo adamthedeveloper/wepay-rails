@@ -34,12 +34,10 @@ GEM
     arel (2.2.3)
     bcrypt-ruby (3.0.1)
     builder (3.0.0)
-    crack (0.1.8)
     erubis (2.7.0)
+    ffi (1.0.11)
     git (1.2.5)
     hike (1.2.1)
-    httparty (0.7.8)
-      crack (= 0.1.8)
     i18n (0.6.0)
     jeweler (1.6.4)
       bundler (~> 1.0)
@@ -92,16 +90,19 @@ GEM
       polyglot (>= 0.3.1)
     turn (0.8.2)
       ansi (>= 1.2.2)
+    typhoeus (0.4.2)
+      ffi (~> 1.0)
+      mime-types (~> 1.18)
     tzinfo (0.3.33)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.0.0)
-  httparty
+  bundler
   jeweler (~> 1.6.4)
   rails (= 3.1.0)
   rcov
   thor
   turn (= 0.8.2)
+  typhoeus

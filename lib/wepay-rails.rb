@@ -2,7 +2,7 @@ require 'active_record'
 require 'helpers/controller_helpers'
 require 'api/account_methods'
 require 'api/checkout_methods'
-require 'httparty'
+require 'typhoeus'
 module WepayRails
   class Configuration
     @@settings = nil
@@ -40,9 +40,9 @@ module WepayRails
 
   module Payments
     class Gateway
-      include HTTParty
+      #include HTTParty
 
-      base_uri @base_uri
+      #base_uri @base_uri
 
       attr_accessor :access_token
       attr_accessor :account_id
@@ -68,7 +68,7 @@ module WepayRails
           :code          => auth_code
         }
 
-        response = self.class.post("#{@api_endpoint}/oauth2/token", {:headers => {'User-Agent' => "WepayRails"}, :body => params})
+        response = Typhoeus::Request.post("#{@api_endpoint}/oauth2/token", {:headers => {'User-Agent' => "WepayRails"}, :params => params})
         json = JSON.parse(response.body)
 
         raise WepayRails::Exceptions::AccessTokenError.new("A problem occurred trying to get the access token: #{json.inspect}") unless json.has_key?("access_token")
@@ -91,9 +91,7 @@ module WepayRails
       end
 
       def wepay_auth_header
-        unless @access_token
-          raise WepayRails::Exceptions::AccessTokenError.new("No access token available")
-        end
+        raise WepayRails::Exceptions::AccessTokenError.new("No access token available") unless @access_token
         {'Authorization' => "Bearer: #{@access_token}", 'User-Agent' => "WepayRails"}
       end
 
@@ -110,16 +108,28 @@ module WepayRails
         end
       end
 
-      def call_api(api_path, params={})
-        response = self.class.post("#{@api_endpoint}#{api_path}", {:headers => wepay_auth_header}.merge!({:body => params}))
-        json = JSON.parse(response.body)
+      def symbolize_response(response)
+        json = JSON.parse(response)
         if json.kind_of? Hash
           json.symbolize_keys! and raise_if_response_error(json)
         elsif json.kind_of? Array
           json.each{|h| h.symbolize_keys!}
         end
-
         json
+      end
+
+      def call_api(api_path, params={}, timeout=30000)
+        response = Typhoeus::Request.post("#{@api_endpoint}#{api_path}", {:headers => wepay_auth_header, :params => params, :timeout => 30000})
+
+        if response.timed_out?
+          raise WepayRails::Exceptions::WepayApiError.new("The request to WePay timed out.  This might mean you sent an invalid request, or WePay is having issues.")
+        else
+          begin
+            json = symbolize_response(response.body)
+          rescue JSON::ParserError => e
+            raise WepayRails::Exceptions::WepayApiError.new("The request to WePay returned no response.  This might mean you sent an invalid request, or WePay is having issues.")
+          end
+        end
       end
 
       include WepayRails::Api::AccountMethods
