@@ -28,4 +28,12 @@ class TestWepayRailsInitialize < ActiveSupport::TestCase
     @gateway = WepayRails::Payments::Gateway.new("myAccessToken")
     assert_equal "myAccessToken", @gateway.access_token
   end
+
+  test "should raise error when WePay times out" do
+    # In this test we simply pass 1 (ie 1 millisecond)) as our third (optional) value for timeout,
+    # basically forcing the request to timeout
+    assert_raise WepayRails::Exceptions::WepayApiError do
+      wepay_gateway.call_api("account/find", {}, 1)
+    end
+  end
 end

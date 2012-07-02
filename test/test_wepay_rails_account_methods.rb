@@ -45,15 +45,7 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
   end
 
   test "should find WePay account by reference id or name" do
-    sleep rand(4) # force Ruby to wait to avoid latency issues
-    @account = wepay_gateway.create_account({
-       :name => "Example Account",
-       :description => "This is just an example WePay account.",
-       :reference_id => "wepayrailstestaccount123"
-    })[:account_id]
-    sleep rand(4)
     @response = wepay_gateway.find_account(:reference_id => "wepayrailstestaccount123")
-    sleep rand(4) and wepay_gateway.delete_account(@response.first[:account_id]) # delete account before asserts to be sure
 
     assert @response.kind_of?(Array), "<Array> expected but was <#{@response.class}>"
     assert_equal 1, @response.length
@@ -61,25 +53,8 @@ class TestWepayRailsAccountMethods < ActiveSupport::TestCase
   end
 
   test "should find all WePay accounts for current authorized user" do
-    skip "Rewrite this test using stubbed API calls"
-
-    # force Ruby to wait using sleep to avoid latency issues;
-    # using rand helps avoid simultaneous connections, but not perfectly
-
-    sleep rand(4)
     @response = wepay_gateway.find_account
     assert @response.kind_of?(Array), "<Array> expected but was <#{@response.class}>"
-
-    @count = @response.length
-    sleep rand(4)
-    wepay_gateway.create_account({
-         :name => "Example Account",
-         :description => "This is just an example WePay account."
-     })
-    sleep 2 + rand(4)
-    @response = wepay_gateway.find_account
-
-    assert_equal @count + 1, @response.length
     assert_equal "Example Account", @response.last[:name]
   end
 
