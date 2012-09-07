@@ -10,6 +10,7 @@ end
 require 'rails/all'
 require 'rails/test_help'
 require 'thor'
+require 'webmock/minitest'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
@@ -27,7 +28,7 @@ module WepayRails
         add_config_defaults(erb) if defaults
       end
 
-      def add_config_defaults(erb=false, client_id="124457", client_secret="f66b540433")
+      def add_config_defaults(erb=false, client_id="168738", client_secret="8d701ad2ac")
         gsub_file "../config/wepay.yml#{'.erb' if erb}", "<your client id from wepay>", client_id, verbose: false
         gsub_file "../config/wepay.yml#{'.erb' if erb}", "<your client secret from wepay>", client_secret, verbose: false
       end
@@ -41,7 +42,7 @@ module WepayRails
 end
 
 class ActiveSupport::TestCase
-  TEST_ACCESS_TOKEN = "73a4de03b0e4636dd204e2de03c3d8c377e45f666595af29b8a7b5d353350541"
+  TEST_ACCESS_TOKEN = "1c69cebd40ababb0447700377dd7751bb645e874edac140f1ba0c35ad6e98c97"
 
   def wepay_gateway(token=TEST_ACCESS_TOKEN)
     @wepay_gateway ||= WepayRails::Payments::Gateway.new(token)
@@ -67,5 +68,35 @@ class ActiveSupport::TestCase
       settings = YAML::load(ERB.new(IO.read(yml+".erb")).result)[Rails.env].symbolize_keys
     end
     WepayRails::Configuration.init_conf(settings)
+  end
+
+  # Stubs for API calls
+  # Uncomment the next line to allow live API calls
+  # WebMock.allow_net_connect!(:net_http_connect_on_start => true)
+
+  def sample_account_response(options={})
+	{ "account_id" => "12345",
+	  "name" => "Example Account",
+	  "description" => "This is just an example WePay account.",
+	  "account_uri" => "https://stage.wepay.com/account/12345" }.merge(options).to_json
+  end
+
+  def sample_find_response(options={})
+	[{ "account_id" => "12345",
+	   "name" => "Custom Reference ID",
+	   "description" => "This is just an example WePay account.",
+	   "reference_id" => "wepayrailstestaccount123",
+	   "account_uri" => "https://stage.wepay.com/account/12345" }.merge(options)].to_json
+  end
+
+  def sample_balance_response(options={})
+	{ "pending_balance" => "500",
+	  "available_balance" => "500",
+	  "currency" => "USD" }.merge(options).to_json
+  end
+
+  def sample_checkout_response(options={})
+	{ "checkout_id" => "6789",
+	  "checkout_uri" => "http://stage.wepay.com/api/checkout/6789" }.merge(options).to_json
   end
 end

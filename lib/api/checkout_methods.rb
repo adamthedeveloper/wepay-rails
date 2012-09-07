@@ -37,16 +37,16 @@ module WepayRails
       # :require_shipping	No	A boolean value (0 or 1). If set to 1 then the payer will be asked to enter a shipping address when they pay. After payment you can retrieve this shipping address by calling /checkout
       # :shipping_fee	No	The amount that you want to charge for shipping.
       # :charge_tax	No	A boolean value (0 or 1). If set to 1 and the account has a relevant tax entry (see /account/set_tax), then tax will be charged.
-      def perform_checkout(parms)
-        security_token = Digest::SHA2.hexdigest("#{rand(4)}#{Time.now.to_i}")
+      def perform_checkout(params)
+        security_token = Digest::SHA2.hexdigest("#{Rails.env.production? ? rand(4) : 1}#{Time.now.to_i}") # Make less random during tests
         
         # add the security token to any urls that were passed in from the app
-        if parms[:callback_uri]
-          parms[:callback_uri] = apply_security_token( parms[:callback_uri], security_token )
+        if params[:callback_uri]
+          params[:callback_uri] = apply_security_token( params[:callback_uri], security_token )
         end
         
-        if parms[:redirect_uri]
-          parms[:redirect_uri] = apply_security_token( parms[:redirect_uri], security_token )
+        if params[:redirect_uri]
+          params[:redirect_uri] = apply_security_token( params[:redirect_uri], security_token )
         end
         
         defaults = {
@@ -60,7 +60,7 @@ module WepayRails
             :require_shipping => @wepay_config[:require_shipping] ? 1 : 0,
             :shipping_fee     => @wepay_config[:shipping_fee],
             :account_id       => @wepay_config[:account_id]
-        }.merge(parms)
+        }.merge(params)
 
         resp = self.call_api("/checkout/create", defaults)
         resp.merge({:security_token => security_token})
