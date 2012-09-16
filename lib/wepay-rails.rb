@@ -98,7 +98,7 @@ module WepayRails
             raise WepayRails::Exceptions::ExpiredTokenError.new("Token either expired, revoked or invalid: #{json[:error_description]}")
           else
             raise WepayRails::Exceptions::WepayApiError.new(json[:error_description])
-	      end
+	  end
         end
       end
 
