@@ -85,7 +85,8 @@ module WepayRails
       end
 
       def wepay_auth_header
-        {'User-Agent' => "WepayRails", 'Authorization' => @access_token.blank? ? nil : "Bearer: #{@access_token}"}
+        @access_token.blank? ? {'User-Agent' => "WepayRails"}
+                             : {'User-Agent' => "WepayRails", 'Authorization' => "Bearer: #{@access_token}"}
       end
 
       def configuration
@@ -98,7 +99,7 @@ module WepayRails
             raise WepayRails::Exceptions::ExpiredTokenError.new("Token either expired, revoked or invalid: #{json[:error_description]}")
           else
             raise WepayRails::Exceptions::WepayApiError.new(json[:error_description])
-	  end
+          end
         end
       end
 
