@@ -3,6 +3,7 @@ class CreateWepayCheckoutRecords < ActiveRecord::Migration
 
         create_table :wepay_checkout_records do |t|
             t.integer :checkout_id
+            t.integer :preapproval_id
             t.integer :account_id
             t.string :state
             t.string :short_description
@@ -17,6 +18,7 @@ class CreateWepayCheckoutRecords < ActiveRecord::Migration
             t.text :redirect_uri
             t.text :callback_uri
             t.text :checkout_uri
+            t.text :preapproval_uri
             t.string :payer_email
             t.string :payer_name
             t.text :cancel_reason

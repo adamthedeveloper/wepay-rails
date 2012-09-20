@@ -1,7 +1,7 @@
+require 'digest/sha2'
 module WepayRails
-  module Helpers
-    module ControllerHelpers
-
+  module Api
+    module PreapprovalMethods
       # Many of the settings you pass in here are already factored in from
       # the wepay.yml file and only need to be overridden if you insist on doing
       # so when this method is called. The following list of key values are pulled
@@ -37,57 +37,62 @@ module WepayRails
       # :require_shipping	No	A boolean value (0 or 1). If set to 1 then the payer will be asked to enter a shipping address when they pay. After payment you can retrieve this shipping address by calling /checkout
       # :shipping_fee	No	The amount that you want to charge for shipping.
       # :charge_tax	No	A boolean value (0 or 1). If set to 1 and the account has a relevant tax entry (see /account/set_tax), then tax will be charged.
-      def init_checkout(params, access_token=nil)
-        wepay_gateway = WepayRails::Payments::Gateway.new(access_token)
-        response      = wepay_gateway.perform_checkout(params)
-
-        if response[:checkout_uri].blank?
-          raise WepayRails::Exceptions::WepayCheckoutError.new("An error occurred: #{response.inspect}")
-        end
-
-        params.merge!({
-            :access_token   => wepay_gateway.access_token,
-            :checkout_id    => response[:checkout_id],
-            :security_token => response[:security_token],
-            :checkout_uri   => response[:checkout_uri]
-        })
+      def perform_preapproval(params)
+        security_token = Digest::SHA2.hexdigest("#{Rails.env.production? ? rand(4) : 1}#{Time.now.to_i}") # Make less random during tests
         
-        params.delete_if {|k,v| !WepayCheckoutRecord.attribute_names.include? k.to_s}
+        # add the security token to any urls that were passed in from the app
+        if params[:callback_uri]
+          params[:callback_uri] = apply_security_token( params[:callback_uri], security_token )
+        end
+        
+        if params[:redirect_uri]
+          params[:redirect_uri] = apply_security_token( params[:redirect_uri], security_token )
+        end
+        
+        defaults = {
+            :callback_uri     => ipn_callback_uri(security_token),
+            :redirect_uri     => checkout_redirect_uri(security_token),
+            :fee_payer        => @wepay_config[:fee_payer],
+            :type             => @wepay_config[:checkout_type],
+            :charge_tax       => @wepay_config[:charge_tax] ? 1 : 0,
+            :app_fee          => @wepay_config[:app_fee],
+            :auto_capture     => @wepay_config[:auto_capture] ? 1 : 0,
+            :require_shipping => @wepay_config[:require_shipping] ? 1 : 0,
+            :shipping_fee     => @wepay_config[:shipping_fee],
+            :account_id       => @wepay_config[:account_id]
+        }.merge(params)
 
-        WepayCheckoutRecord.create(params)
-      end
-
-      def init_checkout_and_send_user_to_wepay(params, access_token=nil)
-        record = init_checkout(params, access_token)
-        redirect_to record.checkout_uri and return
+        resp = self.call_api("/preapproval/create", defaults)
+        resp.merge({:security_token => security_token})
       end
       
-      def init_preapproval(params, access_token=nil)
-        wepay_gateway = WepayRails::Payments::Gateway.new(access_token)
-        response      = wepay_gateway.perform_preapproval(params)
-
-        if response[:preapproval_uri].blank?
-          raise WepayRails::Exceptions::WepayCheckoutError.new("An error occurred: #{response.inspect}")
-        end
-
-        params.merge!({
-            :access_token   => wepay_gateway.access_token,
-            :preapproval_id    => response[:preapproval_id],
-            :security_token => response[:security_token],
-            :preapproval_uri   => response[:preapproval_uri]
-        })
-        
-        params.delete_if {|k,v| !WepayCheckoutRecord.attribute_names.include? k.to_s}
-
-        WepayCheckoutRecord.create(params)
-      end
-      
-      def init_preapproval_and_send_user_to_wepay(params, access_token=nil)
-        record = init_preapproval(params, access_token)
-        redirect_to record.preapproval_uri and return
+      def lookup_preapproval(preapproval_id)
+        co = self.call_api("/preapproval", {:preapproval_id => preapproval_id})
+        co.delete("type")
+        co
       end
 
+      def ipn_callback_uri(security_token)
+        uri = if @wepay_config[:ipn_callback_uri].present?
+                @wepay_config[:ipn_callback_uri]
+              else
+                "#{@wepay_config[:root_callback_uri]}/wepay/ipn"
+              end
+        apply_security_token(uri, security_token)
+      end
 
+      def checkout_redirect_uri(security_token)
+        uri = if @wepay_config[:ipn_callback_uri].present?
+                @wepay_config[:checkout_redirect_uri]
+              else
+                "#{@wepay_config[:root_callback_uri]}/wepay/checkout"
+              end
+        apply_security_token(uri, security_token)
+      end
+
+      def apply_security_token(uri, security_token)
+        uri += (uri =~ /\?/ ? '&' : '?') + "security_token=#{security_token}"
+      end
     end
   end
 end
