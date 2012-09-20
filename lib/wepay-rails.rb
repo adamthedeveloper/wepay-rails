@@ -2,6 +2,7 @@ require 'active_record'
 require 'helpers/controller_helpers'
 require 'api/account_methods'
 require 'api/checkout_methods'
+require 'api/preapproval_methods'
 require 'httparty'
 
 module WepayRails
