@@ -37,6 +37,8 @@ module WepayRails
           resources :ipn
           resources :authorize
           resources :checkout
+          resources :finalize
+          resources :preapproval
         end
       end
     end
@@ -49,6 +51,7 @@ module WepayRails
     class AuthorizationError < StandardError; end
     class WepayCheckoutError < StandardError; end
     class WepayApiError < StandardError; end
+    class WepayPreapprovalError < StandardError; end
   end
 
   module Payments
@@ -149,6 +152,7 @@ module WepayRails
 
       include WepayRails::Api::AccountMethods
       include WepayRails::Api::CheckoutMethods
+      include WepayRails::Api::PreapprovalMethods
     end
 
     include WepayRails::Exceptions
