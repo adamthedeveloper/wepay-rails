@@ -89,6 +89,15 @@ module WepayRails
               end
         apply_security_token(uri, security_token)
       end
+      
+      def preapproval_redirect_uri(security_token)
+        uri = if @wepay_config[:ipn_callback_uri].present?
+                @wepay_config[:preapproval_redirect_uri]
+              else
+                "#{@wepay_config[:root_callback_uri]}/wepay/preapproval"
+              end
+        apply_security_token(uri, security_token)
+      end
 
       def apply_security_token(uri, security_token)
         uri += (uri =~ /\?/ ? '&' : '?') + "security_token=#{security_token}"
