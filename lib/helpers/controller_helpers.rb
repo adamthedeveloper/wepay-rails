@@ -59,7 +59,7 @@ module WepayRails
 
       def init_checkout_and_send_user_to_wepay(params, access_token=nil)
         record = init_checkout(params, access_token)
-        redirect_to record.checkout_uri and return
+        redirect_to record.checkout_uri and return record
       end
       
       def init_preapproval(params, access_token=nil)
@@ -67,7 +67,7 @@ module WepayRails
         response      = wepay_gateway.perform_preapproval(params)
 
         if response[:preapproval_uri].blank?
-          raise WepayRails::Exceptions::WepayCheckoutError.new("An error occurred: #{response.inspect}")
+          raise WepayRails::Exceptions::WepayPreapprovalError.new("An error occurred: #{response.inspect}")
         end
 
         params.merge!({
@@ -84,7 +84,7 @@ module WepayRails
       
       def init_preapproval_and_send_user_to_wepay(params, access_token=nil)
         record = init_preapproval(params, access_token)
-        redirect_to record.preapproval_uri and return
+        redirect_to record.preapproval_uri and return record
       end
 
 
