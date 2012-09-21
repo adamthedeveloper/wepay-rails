@@ -60,7 +60,7 @@ module WepayRails
             :account_id       => @wepay_config[:account_id]
         }.merge(params)
 
-        resp = self.call_api("/preapproval/create", defaults).symbolize_keys!
+        resp = self.call_api("/preapproval/create", defaults)
         resp.merge({:security_token => security_token})
       end
       
