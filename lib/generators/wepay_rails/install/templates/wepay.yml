@@ -5,7 +5,7 @@ production:
   access_token: <your access token that you received when you went to http://your.domain.com/wepay/authorize>
   root_callback_uri: "http://www.example.com"
   after_checkout_redirect_uri: "http://www.example.com/purchase/finalize"
-  scope: [refund_payments,collect_payments,view_balance,view_user]
+  scope: [manage_accounts,refund_payments,collect_payments,view_balance,view_user,preapprove_payments]
   wepay_ui_endpoint: "https://www.wepay.com/v2"
   wepay_api_endpoint: "https://wepayapi.com/v2"
   fee_payer: Payee
@@ -17,12 +17,12 @@ production:
   shipping_fee: 0
   charge_tax: false
 development:
-  client_id: 86055
-  client_secret: 2ea3cba611
-  account_id: 134830
-  access_token: f6a62adb8b56ab0c419bc63f933dcb2a7966966c15ab16ec5dfb2b04f9e31037
-  root_callback_uri: "http://wepay-testing.dev"
-  after_checkout_redirect_uri: "http://wepay-testing.dev/wepay/finalize"
+  client_id: <your client id from wepay>
+  client_secret: <your client secret from wepay>
+  account_id: <your account id from wepay>
+  access_token: <your access token that you received when you went to http://your.domain.com/wepay/authorize>
+  root_callback_uri: "http://www.example.com"
+  after_checkout_redirect_uri: "http://www.example.com/purchase/finalize"
   scope: [manage_accounts,refund_payments,collect_payments,view_balance,view_user,preapprove_payments]
   wepay_ui_endpoint: "https://stage.wepay.com/v2"
   wepay_api_endpoint: "https://stage.wepayapi.com/v2"
@@ -41,7 +41,7 @@ test:
   access_token: <your access token that you received when you went to http://your.domain.com/wepay/authorize>
   root_callback_uri: "http://www.example.com"
   after_checkout_redirect_uri: "http://www.example.com/purchase/finalize"
-  scope: [refund_payments,collect_payments,view_balance,view_user]
+  scope: [manage_accounts,refund_payments,collect_payments,view_balance,view_user,preapprove_payments]
   wepay_ui_endpoint: "https://stage.wepay.com/v2"
   wepay_api_endpoint: "https://stage.wepayapi.com/v2"
   fee_payer: Payee

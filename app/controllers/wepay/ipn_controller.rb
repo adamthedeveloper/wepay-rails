@@ -4,7 +4,7 @@ class Wepay::IpnController < Wepay::ApplicationController
         :security_token  => params[:security_token],
         :checkout_id     => params[:checkout_id],
         :preapproval_id  => params[:preapproval_id],
-      }.delete_if {|k,v| v.nil?}
+      }
 
       record = WepayCheckoutRecord.where(conds).first
 
