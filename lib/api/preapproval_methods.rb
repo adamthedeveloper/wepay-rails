@@ -60,7 +60,7 @@ module WepayRails
             :account_id       => @wepay_config[:account_id]
         }.merge(params)
 
-        resp = self.call_api("/preapproval/create", defaults)
+        resp = self.call_api("/preapproval/create", defaults).symbolize_keys!
         resp.merge({:security_token => security_token})
       end
       
@@ -81,7 +81,7 @@ module WepayRails
 
       
       def preapproval_redirect_uri(security_token)
-        uri = if @wepay_config[:preapproval_redirect_uri].present?
+        uri = if @wepay_config[:ipn_callback_uri].present?
                 @wepay_config[:preapproval_redirect_uri]
               else
                 "#{@wepay_config[:root_callback_uri]}/wepay/preapproval"
