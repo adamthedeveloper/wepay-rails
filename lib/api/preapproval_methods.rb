@@ -86,7 +86,7 @@ module WepayRails
               else
                 "#{@wepay_config[:root_callback_uri]}/preapproval/success" #redirect to success action with text - ALT: "#{@wepay_config[:root_callback_uri]}/wepay/preapproval"
               end
-        #apply_security_token(uri, security_token)
+        #apply_security_token(uri, security_token) /// SECURITY TOKEN REMOVED FROM URL
       end
 
       def apply_security_token(uri, security_token)
