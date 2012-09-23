@@ -129,8 +129,8 @@ module WepayRails
         
         #params.delete_if {|k,v| !WepayCheckoutRecord.attribute_names.include? k.to_s}
         
-        record = WepayCheckoutRecord.find_by_checkout_id_and_preapproval_id(params[:checkout_id],params[:preapproval_id])
-        record.save!
+        wepay_record = WepayCheckoutRecord.find_by_checkout_id_and_preapproval_id(params[:checkout_id],params[:preapproval_id])
+        wepay_record.update_all(params)
       end
 
       def init_charge_and_return_ipn(params, access_token=nil)
