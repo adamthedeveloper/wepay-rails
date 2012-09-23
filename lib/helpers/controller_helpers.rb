@@ -128,9 +128,12 @@ module WepayRails
             :checkout_uri   => response[:checkout_uri]
         })
         
-        params.delete_if {|k,v| !WepayCheckoutRecord.attribute_names.include? k.to_s}
-
+        #params.delete_if {|k,v| !WepayCheckoutRecord.attribute_names.include? k.to_s}
+        
+        response.update_attributes(params)
         WepayCheckoutRecord.create(params)
+        
+        
       end
 
       def init_charge_and_return_ipn(params, access_token=nil)
