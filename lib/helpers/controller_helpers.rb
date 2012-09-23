@@ -116,10 +116,6 @@ module WepayRails
         wepay_gateway = WepayRails::Payments::Gateway.new(access_token)
         response      = wepay_gateway.perform_charge(params)
 
-        #if response[:checkout_uri].blank?
-          #raise WepayRails::Exceptions::WepayChargeError.new("An error occurred: #{response.inspect}")
-        #end
-
         params.merge!({
             :access_token   => wepay_gateway.access_token,
             :preapproval_id => response[:preapproval_id],
@@ -127,14 +123,14 @@ module WepayRails
             :security_token => response[:security_token],
         })
         
-        #params.delete_if {|k,v| !WepayCheckoutRecord.attribute_names.include? k.to_s}
-        
-        wepay_record = WepayCheckoutRecord.find_by_checkout_id_and_preapproval_id(params[:checkout_id],params[:preapproval_id])
+        params.delete_if {|k,v| !WepayCheckoutRecord.attribute_names.include? k.to_s}
+
+        WepayCheckoutRecord.create(params)
       end
 
       def init_charge_and_return_ipn(params, access_token=nil)
         record = init_charge(params, access_token)
-        redirect_to charge_finalize_url and return record
+        redirect_to charge_success_url and return record
       end
     
 
