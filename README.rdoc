@@ -6,7 +6,7 @@ Wepay-Rails allows your rails app to accept payments with Wepay (http://www.wepa
 
 = Features
 
-* Added preauthorization and withdrawal ability
+* Added PREAPPROVAL and DELAYED CHARGE ability
 * Built in IPN that listens to push notifications from wepay and updates saved checkout records for you
 * Allows you to fetch your access token easily through a web interface
 * Built in API tools to allow you to make all wepay-api calls easily
