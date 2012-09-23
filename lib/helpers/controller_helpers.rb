@@ -135,7 +135,7 @@ module WepayRails
 
       def init_charge_on_preapproval(params, access_token=nil)
         record = init_charge(params, access_token)
-        redirect_to record.checkout_uri and return record
+        redirect_to charge_redirect_uri
       end
     
 
