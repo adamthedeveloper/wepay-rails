@@ -1,12 +1,7 @@
 class Wepay::IpnController < Wepay::ApplicationController
+  include WepayRails::Payments
   def update
-      conds = {
-        :security_token  => params[:security_token],
-        :checkout_id     => params[:checkout_id],
-        :preapproval_id  => params[:preapproval_id],
-      }
-
-      record = WepayCheckoutRecord.where(conds).first
+      record = WepayCheckoutRecord.find_by_checkout_id_and_security_token(params[:checkout_id],params[:security_token])
 
       if record.present?
         wepay_gateway = WepayRails::Payments::Gateway.new

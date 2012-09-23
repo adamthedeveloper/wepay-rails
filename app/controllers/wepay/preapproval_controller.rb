@@ -10,13 +10,23 @@ class Wepay::PreapprovalController < Wepay::ApplicationController
           preapproval = wepay_gateway.lookup_preapproval(record.preapproval_id)
 
           #remove unneccesary attributes
-          #preapproval.delete_if {|k,v| !record.attributes.include? k.to_s}
+          preapproval.delete_if {|k,v| !record.attributes.include? k.to_s}
           
           record.update_attributes(preapproval)
           redirect_to "#{wepay_gateway.configuration[:after_checkout_redirect_uri]}?preapproval_id=#{params[:preapproval_id]}"
         else
           raise StandardError.new("Wepay IPN: No record found for preapproval_id #{params[:preapproval_id]} and security_token #{params[:security_token]}")
         end
+  end
+  
+  def success
+    response = WepayCheckoutRecord.find(:last)
+    wepay_gateway = WepayRails::Payments::Gateway.new( response.access_token )
+    charge = wepay_gateway.lookup_preapproval(response.preapproval_id)
+
+    response.update_attributes(charge)
+    logger.info params
+    render :text => "PRE-APPROVAL OK from #{response.payer_email} with Pre-approval ID # #{response.preapproval_id}. You can use this Pre-approval Id# to run a charge at a later time."
   end
   
   def new
