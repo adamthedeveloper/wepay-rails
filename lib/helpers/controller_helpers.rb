@@ -135,7 +135,7 @@ module WepayRails
 
       def init_charge_on_preapproval(params, access_token=nil)
         record = init_charge(params, access_token)
-        redirect_to wepay_charge_index_url
+        redirect_to wepay_ipn_update_path
       end
     
 
