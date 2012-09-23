@@ -3,6 +3,7 @@ require 'helpers/controller_helpers'
 require 'api/account_methods'
 require 'api/checkout_methods'
 require 'api/preapproval_methods'
+require 'api/charge_methods'
 require 'httparty'
 
 module WepayRails
@@ -40,6 +41,7 @@ module WepayRails
           resources :checkout
           resources :finalize
           resources :preapproval
+          resources :charge
         end
       end
     end
@@ -53,6 +55,7 @@ module WepayRails
     class WepayCheckoutError < StandardError; end
     class WepayApiError < StandardError; end
     class WepayPreapprovalError < StandardError; end
+    class WepayChargeError < StandardError; end
   end
 
   module Payments
@@ -154,6 +157,7 @@ module WepayRails
       include WepayRails::Api::AccountMethods
       include WepayRails::Api::CheckoutMethods
       include WepayRails::Api::PreapprovalMethods
+      include WepayRails::Api::ChargeMethods
     end
 
     include WepayRails::Exceptions

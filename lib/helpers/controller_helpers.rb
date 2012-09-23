@@ -111,7 +111,33 @@ module WepayRails
         record = init_preapproval(params, access_token)
         redirect_to record.preapproval_uri and return record
       end
+      
+      def init_charge(params, access_token=nil)
+        wepay_gateway = WepayRails::Payments::Gateway.new(access_token)
+        response      = wepay_gateway.perform_charge(params)
 
+        #if response[:checkout_uri].blank?
+          #raise WepayRails::Exceptions::WepayChargeError.new("An error occurred: #{response.inspect}")
+        #end
+
+        params.merge!({
+            :access_token   => wepay_gateway.access_token,
+            :preapproval_id => response[:preapproval_id],
+            :checkout_id    => response[:checkout_id],
+            :security_token => response[:security_token],
+            :checkout_uri   => response[:checkout_uri]
+        })
+        
+        params.delete_if {|k,v| !WepayCheckoutRecord.attribute_names.include? k.to_s}
+
+        WepayCheckoutRecord.create(params)
+      end
+
+      def init_charge_on_preapproval(params, access_token=nil)
+        record = init_charge(params, access_token)
+        redirect_to record.checkout_uri and return record
+      end
+    
 
     end
   end
