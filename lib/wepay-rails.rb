@@ -43,6 +43,9 @@ module WepayRails
           resources :preapproval
           resources :charge
         end
+        match '/preapproval/success'  => 'wepay/preapproval#success'
+        match '/preapproval/charge'   => 'wepay/charge#new'
+        match '/charge/success'       => 'wepay/charge#success'
       end
     end
   end

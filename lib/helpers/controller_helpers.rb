@@ -128,7 +128,7 @@ module WepayRails
         WepayCheckoutRecord.create(params)
       end
 
-      def init_charge_and_return_ipn(params, access_token=nil)
+      def init_charge_and_return_success(params, access_token=nil)
         record = init_charge(params, access_token)
         redirect_to charge_success_url and return record
       end
