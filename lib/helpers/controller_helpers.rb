@@ -133,9 +133,9 @@ module WepayRails
         WepayCheckoutRecord.create(params)
       end
 
-      def init_charge_on_preapproval(params, access_token=nil)
+      def init_charge_and_send_user_to_wepay(params, access_token=nil)
         record = init_charge(params, access_token)
-        redirect_to wepay_ipn_update_path
+        redirect_to record.checkout_uri and return record
       end
     
 
