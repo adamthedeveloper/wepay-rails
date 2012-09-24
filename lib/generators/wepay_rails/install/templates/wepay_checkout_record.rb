@@ -26,4 +26,11 @@ class WepayCheckoutRecord < ActiveRecord::Base
                   :preapproval_id, 
                   :preapproval_uri,
                   :reference_id
+                  :period, 
+                  :frequency, 
+                  :start_time, 
+                  :end_time, 
+                  :auto_recur, 
+                  :create_time, 
+                  :manage_uri
 end

@@ -30,11 +30,19 @@ class CreateWepayCheckoutRecords < ActiveRecord::Migration
             t.string :security_token
             t.string :access_token
             t.string :mode
+            t.string :period
+            t.integer :frequency
+            t.datetime :start_time
+            t.datetime :end_time
+            t.string :manage_uri
+            t.datetime :create_time
+            t.boolean :auto_recur
 
             t.timestamps
         end
 
         add_index :wepay_checkout_records, :checkout_id
+        add_index :wepay_checkout_records, :preapproval_id
     end
 
     def self.down
