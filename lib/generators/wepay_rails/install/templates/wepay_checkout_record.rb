@@ -25,7 +25,7 @@ class WepayCheckoutRecord < ActiveRecord::Base
                   :mode, 
                   :preapproval_id, 
                   :preapproval_uri,
-                  :reference_id
+                  :reference_id,
                   :period, 
                   :frequency, 
                   :start_time, 
