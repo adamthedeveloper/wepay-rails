@@ -71,6 +71,12 @@ module WepayRails
         co.delete(:type)
         co
       end
+      
+      def lookup_preapproval(preapproval_id)
+        co = self.call_api("/preapproval", {:preapproval_id => preapproval_id})
+        co.delete("type")
+        co
+      end
 
       def ipn_callback_uri(security_token)
         uri = if @wepay_config[:ipn_callback_uri].present?

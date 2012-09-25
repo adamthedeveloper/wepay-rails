@@ -99,4 +99,9 @@ class ActiveSupport::TestCase
 	{ "checkout_id" => "6789",
 	  "checkout_uri" => "http://stage.wepay.com/api/checkout/6789" }.merge(options).to_json
   end
+  
+  def sample_preapproval_response(options={})
+	{ "preapproval_id" => "6789",
+	  "preapproval_uri" => "http://stage.wepay.com/api/preapproval/6789" }.merge(options).to_json
+  end
 end
