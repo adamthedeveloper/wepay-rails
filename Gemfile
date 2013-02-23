@@ -8,6 +8,7 @@ gem 'httparty'
 # Include everything needed to run rake, tests, features, etc.
 group :development do
   gem "rails", "3.1.0"
+  gem "rake"
   gem 'turn', '0.8.2', :require => false
   gem 'thor'
   gem "bundler"

@@ -59,9 +59,80 @@ module WepayRails
 
       def init_checkout_and_send_user_to_wepay(params, access_token=nil)
         record = init_checkout(params, access_token)
-        redirect_to record.checkout_uri and return
+        redirect_to record.checkout_uri and return record
+      end
+      
+      #Parameter				Required	Format			Description
+      #account_id				Yes		Number			The WePay account where the money will go when you use this pre-approval to execute a payment.
+      #amount					No		Number			The amount for the pre-approval. The API application can charge up to this amount every period.
+      #short_description			Yes		String			A short description of what the payer is paying for.
+      #period					Yes		String			Can be: hourly, daily, weekly, biweekly, monthly, bimonthly, quarterly, yearly, or once. The API application can charge the payer every period.
+      #reference_id				No		String			The reference id of the pre-approval. Can be any string, but must be unique for the application/user pair.
+      #app_fee					No		Number			The application fee that will go to the API application's account.
+      #fee_payer				No		String			Who will pay the WePay fees and app fees (if set). Can be payee or payer. Defaults to payer.
+      #redirect_uri				No		String			The uri the payer will be redirected to after approving the pre-approval.
+      #callback_uri				No		String			The uri that any instant payment notifications will be sent to. Needs to be a full uri (ex https://www.wepay.com ) and must NOT be localhost or 127.0.0.1 or include wepay.com. Max 2083 										chars.
+      #require_shipping			No		Boolean			Defaults to false. If set to true then the payer will be require to enter their shipping address when they approve the pre-approval.
+      #shipping_fee				No		Number			The dollar amount of shipping fees that will be charged.
+      #charge_tax				No		Boolean			Defaults to false. If set to true then any applicable taxes will be charged.
+      #payer_email_message			No		String			A short message that will be included in the payment confirmation email to the payer.
+      #payee_email_message			No		String			A short message that will be included in the payment confirmation email to the payee.
+      #long_description			No		String			An optional longer description of what the payer is paying for.
+      #frequency				No		Number			How often per period the API application can charge the payer.
+      #start_time				No		Number or String	When the API application can start charging the payer. Can be a unix_timestamp or a parse-able date-time.
+      #end_time				No		Number or String	The last time the API application can charge the payer. Can be a unix_timestamp or a parse-able date-time. The default value is five (5) years from the preapproval creation time.
+      #auto_recur				No		Boolean			Set to true if you want the payments to automatically execute every period. Useful for subscription use cases. Default value is false. Only the following periods are allowed if you set 										auto_recur to true: Weekly, Biweekly, Monthly, Quarterly, Yearly
+      #mode					No		String			What mode the pre-approval confirmation flow will be displayed in. The options are 'iframe' or 'regular'. Choose 'iframe' if this is an iframe pre-approval. Mode defaults to 'regular'.
+      #prefill_info				No		Object			A JSON object that lets you pre fill certain fields in the pre-approval flow. Allowed fields are 'name', 'email', 'phone_number', 'address', 'city', 'state', 'zip', Pass the prefill-info 										as a JSON object like so: {"name":"Bill Clerico","phone_number":"855-469-3729"}
+      #funding_sources				No		String			What funding sources you want to accept for this checkout. Options are: "bank,cc" to accept both bank and cc payments, "cc" to accept just credit card payments, and "bank" to accept just 										bank payments.
+      
+      
+      def init_preapproval(params, access_token=nil)
+        wepay_gateway = WepayRails::Payments::Gateway.new(access_token)
+        response      = wepay_gateway.perform_preapproval(params)
+
+        if response[:preapproval_uri].blank?
+          raise WepayRails::Exceptions::WepayPreapprovalError.new("An error occurred: #{response.inspect}")
+        end
+
+        params.merge!({
+            :access_token   => wepay_gateway.access_token,
+            :preapproval_id    => response[:preapproval_id],
+            :security_token => response[:security_token],
+            :preapproval_uri   => response[:preapproval_uri]
+        })
+        
+        params.delete_if {|k,v| !WepayCheckoutRecord.attribute_names.include? k.to_s}
+
+        WepayCheckoutRecord.create(params)
+      end
+      
+      def init_preapproval_and_send_user_to_wepay(params, access_token=nil)
+        record = init_preapproval(params, access_token)
+        redirect_to record.preapproval_uri and return record
+      end
+      
+      def init_charge(params, access_token=nil)
+        wepay_gateway = WepayRails::Payments::Gateway.new(access_token)
+        response      = wepay_gateway.perform_charge(params)
+
+        params.merge!({
+            :access_token   => wepay_gateway.access_token,
+            :preapproval_id => response[:preapproval_id],
+            :checkout_id    => response[:checkout_id],
+            :security_token => response[:security_token],
+        })
+        
+        params.delete_if {|k,v| !WepayCheckoutRecord.attribute_names.include? k.to_s}
+
+        WepayCheckoutRecord.create(params)
       end
 
+      def init_charge_and_return_success(params, access_token=nil)
+        record = init_charge(params, access_token)
+        redirect_to charge_success_url and return record
+      end
+    
 
     end
   end
