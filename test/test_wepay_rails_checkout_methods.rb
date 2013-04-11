@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/helper')
 
 class TestWepayRailsCheckoutMethods < ActiveSupport::TestCase
-  include WepayRails::Helpers::ControllerHelpers
+    include WepayRails::Helpers::ControllerHelpers
 
   def setup
     create_wepay_config_file(false, true)
