@@ -60,7 +60,11 @@ module WepayRails
             :account_id       => @wepay_config[:account_id]
         }.merge(params)
 
+        begin
         resp = self.call_api("/preapproval/create", defaults)
+        rescue => e
+          puts e.message
+        end
         resp.merge({:security_token => security_token})
       end
       
