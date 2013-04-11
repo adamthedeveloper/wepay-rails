@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "wepay-rails"
-  s.version = "2.5.0"
+  s.version = "2.5.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adam Medeiros"]
-  s.date = "2012-09-16"
+  s.date = "2013-04-11"
   s.description = "Rails gem that interfaces with the WePay API"
   s.email = "adammede@gmail.com"
   s.extra_rdoc_files = [
@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
     "README.rdoc"
   ]
   s.files = [
+    ".DS_Store",
     ".document",
     ".travis.yml",
     "Gemfile",
@@ -27,13 +28,18 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "VERSION",
+    "app/.DS_Store",
     "app/controllers/wepay/application_controller.rb",
     "app/controllers/wepay/authorize_controller.rb",
+    "app/controllers/wepay/charge_controller.rb",
     "app/controllers/wepay/checkout_controller.rb",
     "app/controllers/wepay/ipn_controller.rb",
+    "app/controllers/wepay/preapproval_controller.rb",
     "build",
     "lib/api/account_methods.rb",
+    "lib/api/charge_methods.rb",
     "lib/api/checkout_methods.rb",
+    "lib/api/preapproval_methods.rb",
     "lib/generators/wepay_rails/install/install_generator.rb",
     "lib/generators/wepay_rails/install/templates/create_wepay_checkout_records.rb",
     "lib/generators/wepay_rails/install/templates/wepay.yml",
@@ -45,6 +51,7 @@ Gem::Specification.new do |s|
     "test/test_wepay_rails_authorize.rb",
     "test/test_wepay_rails_checkout_methods.rb",
     "test/test_wepay_rails_initialize.rb",
+    "test/test_wepay_rails_preapproval_methods.rb",
     "wepay-rails.gemspec"
   ]
   s.homepage = "http://github.com/adamthedeveloper/wepay-rails"
@@ -59,6 +66,7 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<httparty>, [">= 0"])
       s.add_development_dependency(%q<rails>, ["= 3.1.0"])
+      s.add_development_dependency(%q<rake>, [">= 0"])
       s.add_development_dependency(%q<turn>, ["= 0.8.2"])
       s.add_development_dependency(%q<thor>, [">= 0"])
       s.add_development_dependency(%q<bundler>, [">= 0"])
@@ -68,6 +76,7 @@ Gem::Specification.new do |s|
     else
       s.add_dependency(%q<httparty>, [">= 0"])
       s.add_dependency(%q<rails>, ["= 3.1.0"])
+      s.add_dependency(%q<rake>, [">= 0"])
       s.add_dependency(%q<turn>, ["= 0.8.2"])
       s.add_dependency(%q<thor>, [">= 0"])
       s.add_dependency(%q<bundler>, [">= 0"])
@@ -78,6 +87,7 @@ Gem::Specification.new do |s|
   else
     s.add_dependency(%q<httparty>, [">= 0"])
     s.add_dependency(%q<rails>, ["= 3.1.0"])
+    s.add_dependency(%q<rake>, [">= 0"])
     s.add_dependency(%q<turn>, ["= 0.8.2"])
     s.add_dependency(%q<thor>, [">= 0"])
     s.add_dependency(%q<bundler>, [">= 0"])
