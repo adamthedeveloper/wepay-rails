@@ -1,8 +1,4 @@
 class WepayCheckoutRecord < ActiveRecord::Base
-  belongs_to :checkout
-  belongs_to :preapproval
-  belongs_to :ipn
-  belongs_to :authorize
   attr_accessible :amount, 
                   :short_description, 
                   :access_token, 

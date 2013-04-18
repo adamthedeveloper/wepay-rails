@@ -144,12 +144,14 @@ module WepayRails
       end
 
       # Fetch the access token from wepay for the auth code
-      def get_access_token(auth_code, redirect_uri)
+      def get_access_token(auth_code, redirect_uri, callback_uri = nil)
         params = {
           :client_id     => @wepay_config[:client_id],
           :client_secret => @wepay_config[:client_secret],
           :redirect_uri  => redirect_uri,
-          :code          => auth_code
+          :code          => auth_code,
+          :callback_uri  => callback_uri # Optional field in which you will receive IPNs with the user_id
+                                         # when the user revokes an access_token or is deleted.
         }
         json = call_api("/oauth2/token", params)
         raise WepayRails::Exceptions::AccessTokenError.new("A problem occurred trying to get the access token: #{json.inspect}") unless json.has_key?(:access_token)

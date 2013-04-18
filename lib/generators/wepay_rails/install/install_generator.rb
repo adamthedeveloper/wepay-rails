@@ -21,7 +21,7 @@ module WepayRails
 
       def copy_migrations
         migration_template "create_wepay_checkout_records.rb", "db/migrate/create_wepay_checkout_records.rb"
-        copy_file "wepay_checkout_record.rb", "lib/models/wepay_checkout_record.rb"
+        copy_file "wepay_checkout_record.rb", "app/models/wepay_checkout_record.rb"
         copy_file "wepay.yml", "config/wepay.yml.example"
       end
     end
