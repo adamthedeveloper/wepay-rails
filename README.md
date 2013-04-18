@@ -6,7 +6,7 @@ Wepay-Rails allows your rails app to accept payments with [Wepay](http://www.wep
 [travis]: https://secure.travis-ci.org/adamthedeveloper/wepay-rails.png?branch=master
 [travis-link]: http://travis-ci.org/adamthedeveloper/wepay-rails
 
-# Features
+## Features
 
 * Added PREAPPROVAL and DELAYED CHARGE ability 09/2012
 * Built in IPN that listens to push notifications from wepay and updates saved checkout records for you
@@ -17,7 +17,7 @@ Wepay-Rails allows your rails app to accept payments with [Wepay](http://www.wep
 * Authorize many users to accept payments dynamically (see Wiki https://github.com/adamthedeveloper/wepay-rails/wiki/Authorize-Many-Users-Dynamically)
 * Configurable
 
-# Installation
+## Installation
 
 To install it, add this to your Gemfile
 
@@ -62,7 +62,7 @@ your.railsapp.com/wepay/authorize
 Login at the prompt or register. You will be sent back to your app and you should have gotten an access_token. Copy it to your wepay.yml
 file and restart your app.
 
-# Example
+## Example
 
 I created a controller called finalize_controller and I use it for a landing page when the customer is finished paying
 their order. The other controller I created is a checkout_controller - I send my customers to it when they click checkout
@@ -127,30 +127,22 @@ class Purchase::FinalizeController < ApplicationController
 end
 ```
 
-# Example of WePay Oauth
+## Example of WePay Oauth
 
-## Setup
+For reference, please refer to WePay's [documentation on Oauth](https://www.wepay.com/developer/reference/oauth2).
 
-As an example, I have the User MVC.
+### Setup
 
-I have the following routes for WePay:
+As an example, I have the User model, view, and controller.
+
+I have the following routes for WePay in my `config/routes.rb:
 
 ```ruby
 match 'wepay_connect',  to: 'users#wepay_connect'
 match 'wepay_auth',     to: 'users#wepay_auth'
 ```
 
-I have this in the view, assuming that a user is currently signed in:
-
-```ruby
-link_to "Connect To WePay", wepay_connect_path
-```
-
-When the user clicks on this link, he will be prompted to start the WePay Oauth flow.
-
-Please also refer to WePay's [documentation on Oauth](https://www.wepay.com/developer/reference/oauth2).
-
-## Controllers
+### Controllers
 
 The first method that we will hit in this example is `wepay_connect` in my `Users` controller:
 
@@ -178,13 +170,22 @@ def wepay_auth
 end
 ```
 
+### Start Oauth
+
+I have this in the view, assuming that a user is currently signed in:
+
+```ruby
+link_to "Connect To WePay", wepay_connect_path
+```
+
+When the user clicks on this link, he will be prompted to start the WePay Oauth flow.
 
 ## Special Thanks to additional contributers of Wepay-Rails
 * lucisferre (Chris Nicola) https://github.com/lucisferre
 * mindeavor (Gilbert) https://github.com/mindeavor
 * ustorf (Bernd Ustorf) https://github.com/ustorf
 * dragonstarwebdesign (Steve Aquino) https://github.com/dragonstarwebdesign
-
+* jules27 (Julie Mao) https://github.com/jules27
 
 ## Contributing to wepay-rails
  
