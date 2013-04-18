@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = [
     "LICENSE.txt",
     "README",
+    "README.md",
     "README.rdoc"
   ]
   s.files = [
@@ -25,6 +26,7 @@ Gem::Specification.new do |s|
     "Gemfile.lock",
     "LICENSE.txt",
     "README",
+    "README.md",
     "README.rdoc",
     "Rakefile",
     "VERSION",
